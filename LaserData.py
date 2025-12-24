@@ -7,6 +7,7 @@ from Devices import DeviceMaker
 from Build_Interface import Monitoring_Interface
 
 
+
 class Laser_Data(Monitoring_Interface):
 
     def __init__(self, polling_period: float, buffer_size: int=1000):

@@ -3,9 +3,10 @@ from tango import DeviceProxy
 import numpy as np
 import random
 import Thread
+from PyQt6.QtWidgets import QWidget
 
 
-class Device:
+class Device(QWidget):
     """
     Base class for all devices
     """
@@ -21,6 +22,14 @@ class Device:
     def get_data(self):
         """Each device implements its own data retrieval"""
         pass
+
+    def start_thread(self):
+        self.threadRunAcq = Thread.ThreadRunAcq(self)
+        self.threadRunAcq.newState.connect(self._foo)
+
+    def _foo(self):
+        print(f'foo')
+
 class DummyDevice(Device):
     def __init__(self, definition: dict):
         super().__init__(definition)
