@@ -15,21 +15,24 @@ import pyqtgraph as pg
 import qdarkstyle
 import os
 import pathlib
+import numpy as np
 
 sepa = os.sep
 
 
 class Monitoring_Interface(QMainWindow):
 
-    def __init__(self):
+    def __init__(self, buffer_size: int=1000):
         super().__init__()
         p = pathlib.Path(__file__)
         self.icon = str(p.parent.parent) + sepa + 'icons' + sepa
-        self.setup()
-        self._cache_setup()
-        self.action_button()
+        self.setup_interface()
+        self.graphs = {}
+        self.graph_widgets = {}
+        self.add_graph('This device')
+        self.add_graph('That device')
 
-    def setup(self):
+    def setup_interface(self):
         #####################################################################
         #                   Window setup
         #####################################################################
@@ -38,7 +41,7 @@ class Monitoring_Interface(QMainWindow):
         self.setWindowIcon(QIcon(self.icon + 'LOA.png'))
         self.setStyleSheet(qdarkstyle.load_stylesheet(qt_api='pyqt6'))
         self.setWindowIcon(QIcon('./icons/LOA.png'))
-        self.setGeometry(100, 30, 1200, 750)
+        self.setGeometry(100, 30, 1200, 300)
 
         self.toolBar = self.addToolBar('tools')
         self.toolBar.setMovable(False)
@@ -83,45 +86,54 @@ class Monitoring_Interface(QMainWindow):
         self.hbox.addWidget(self.vbox2widget)
 
         # Title
-        title_label = QLabel('Laser monitoring')
+        title_label = QLabel('')
         title_label.setFont(QFont('Arial', 14))
         title_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.vbox2.addWidget(title_label)
 
-        #####################################################################
-        #       Fill layout with graphs, controls and indicators
-        #####################################################################
 
-        ######################
-        #       Graphs
-        ######################
+    ######################
+    #       Graphs
+    ######################
+    def add_graph(self, device_name: str):
+        # Create the graphics widget
+        graph_widget = pg.GraphicsLayoutWidget()
+        self.vbox1.addWidget(graph_widget)
 
-        # Setup 1D plot
-        self.graph_widget = pg.GraphicsLayoutWidget()
-        self.vbox1.addWidget(self.graph_widget)
+        # Create the plot
+        plot = graph_widget.addPlot()
+        plot.setContentsMargins(10, 10, 10, 10)
 
-        self.dnde_image = self.graph_widget.addPlot()
-        self.dnde_image.setContentsMargins(10, 10, 10, 10)
+        # Store both in dictionaries with device_name as key
+        self.graph_widgets[device_name] = graph_widget
+        self.graphs[device_name] = plot
 
-        self.vbox2.addStretch(1)
-        #####################################################################
-        #                       Interface actions
-        #####################################################################
-    def _cache_setup(self):
-        pass
-    def action_button(self) -> None:
-        pass
+    def update_graph(self, device_name: str, x_data, y_data):
+        """Update a specific device's graph"""
+        if device_name in self.graphs:
+            self.graphs[device_name].plot(x_data, y_data, clear=True)
+        else:
+            print(f"Warning: No graph found for device '{device_name}'")
 
-    def clear_bounds_cache(self):
-        pass
+    def get_graph(self, device_name: str):
+        """Retrieve a specific graph by device name"""
+        return self.graphs.get(device_name)
 
-    def clear_graph(self) -> None:
-        pass
+    def remove_graph(self, device_name: str):
+        """Remove a graph and its widget"""
+        if device_name in self.graphs:
+            # Remove the widget from layout
+            self.vbox1.removeWidget(self.graph_widgets[device_name])
+            self.graph_widgets[device_name].deleteLater()
+
+            # Remove from dictionaries
+            del self.graphs[device_name]
+            del self.graph_widgets[device_name]
 
 if __name__ == "__main__":
 
     appli = QApplication(sys.argv)
     appli.setStyleSheet(qdarkstyle.load_stylesheet(qt_api='pyqt6'))
-    e=Monitoring_Interface()
+    e= Monitoring_Interface()
     e.show()
     appli.exec_()
