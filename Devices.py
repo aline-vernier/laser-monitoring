@@ -4,6 +4,8 @@ import numpy as np
 import random
 import Thread
 from PyQt6.QtWidgets import QWidget
+from PyQt6.QtCore import pyqtSignal, QThread
+
 
 
 class Device(QWidget):
@@ -16,28 +18,38 @@ class Device(QWidget):
         self.name = definition['name']
         self.address = definition['address']
         self.type = definition['type']
-
+        
 
     @abstractmethod
     def get_data(self):
         """Each device implements its own data retrieval"""
         pass
 
-    def start_thread(self):
-        self.threadRunAcq = Thread.ThreadRunAcq(self)
-        self.threadRunAcq.newState.connect(self._foo)
 
-    def _foo(self):
-        print(f'foo')
+
 
 class DummyDevice(Device):
     def __init__(self, definition: dict):
         super().__init__(definition)
-        self.get_data()
+        period_ms = 100
+        self.worker = Thread.VirtualDevice(self.name, period_ms)
+         # Create thread
+        self.thread = QThread()
+        self.worker.moveToThread(self.thread)
+        
+        # Connect thread started signal to worker start method
+        self.thread.started.connect(self.worker.start)
 
-    def get_data(self):
-        self.data = random.randint(5000, 10000)/100
-        print(f'self.data: {self.data}')
+      
+    def start_monitoring(self):
+        """Start the device thread"""
+        self.thread.start()
+    
+    def stop_monitoring(self):
+        """Stop the device thread"""
+        self.worker.stop()
+        self.thread.quit()
+        self.thread.wait()
 
 
 
@@ -118,6 +130,7 @@ class DeviceMaker:
     def create(cls, definition: dict) -> Device:
         device_type = definition.get('type')
         device_class = cls._device_types.get(device_type)
+        
 
         if not device_class:
             raise ValueError(f"Unknown device type: {device_type}")

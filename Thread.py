@@ -1,32 +1,51 @@
-from PyQt6 import QtCore
-from PyQt6.QtCore import pyqtSlot
+from PyQt6.QtCore import pyqtSignal, QThread, QTimer
+from PyQt6.QtCore import QObject, pyqtSignal, QThread, QTimer
 
-class ThreadRunAcq(QtCore.QThread):
-    """
-    Thread for independent asynchronous acquisition
-    """
-    newDataRun = QtCore.pyqtSignal(object)
-    newState = QtCore.pyqtSignal(bool)
+import random
 
-    def __init__(self, parent):
 
-        super(ThreadRunAcq, self).__init__()
-        self.parent = parent
-        self.stopRunAcq = False
 
-    def new_run(self):
-        self.stopRunAcq = False
+class Data_Acquisition_Thread(QObject):
+    """Base class that runs in a separate thread"""
+    # Signal must be a class attribute
+    data_received = pyqtSignal(str, dict)  # (device_id, data)
+    error_occurred = pyqtSignal(str, str)  # (device_id, error_message)
+    
+    def __init__(self, device_id: str):
+        super().__init__()
+        self.device_id = device_id
+        self.running = False
+    
+    def stop(self):
+        self.running = False
 
-    @pyqtSlot()
-    def run(self):
-        self.newState.emit(True)
-        while self.stopRunAcq is not True:
-            try:
-                pass
-            except:
-                pass
-        if self.stopRunAcq == True:
-            pass
 
-    def stopThreadRunAcq(self):
-        self.stopRunAcq = True
+class VirtualDevice(Data_Acquisition_Thread):
+    """Virtual device that emits data periodically"""
+    
+    def __init__(self, device_id: str, period_ms: int = 1000):
+        super().__init__(device_id)
+        self.period_ms = period_ms
+        self.timer = None
+    
+    def start(self):
+        """Called when moved to thread"""
+        self.running = True
+        self.timer = QTimer()
+        self.timer.timeout.connect(self._generate_data)
+        self.timer.start(self.period_ms)
+    
+    def _generate_data(self):
+        if self.running:
+            # Simulate device data
+            data = {
+                'energy': random.uniform(1500, 2000)/10,
+                'timestamp': QThread.currentThread().currentThreadId()
+            }
+            self.data_received.emit(self.device_id, data)
+    
+    def stop(self):
+        if self.timer:
+            self.timer.stop()
+        super().stop()
+
