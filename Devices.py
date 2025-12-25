@@ -2,7 +2,7 @@ from abc import abstractmethod
 from tango import DeviceProxy
 import numpy as np
 import random
-import Thread
+import Data_Acquisition
 from PyQt6.QtWidgets import QWidget
 from PyQt6.QtCore import QObject, pyqtSignal, QThread, QTimer
 import time 
@@ -46,22 +46,18 @@ class Device(QObject):
         self.worker.running = False
         time.sleep(1)
         self.thread.quit()
-    
-
-
 
 
 class DummyDevice(Device):
     def __init__(self, definition: dict):
         super().__init__(definition)
-        period_ms = 500
+        period_ms = 1000
 
         # Thread setup
-        self.worker = Thread.VirtualDevice(self.name, period_ms)
+        self.worker = Data_Acquisition.VirtualDevice(self.name, period_ms)
         self.worker.moveToThread(self.thread)
         # Connect thread started signal to worker start method
         self.thread.started.connect(self.worker.start)
-
 
 
 class Spectrometer(Device):

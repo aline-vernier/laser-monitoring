@@ -6,7 +6,7 @@ import random
 
 
 
-class Data_Acquisition_Thread(QObject):
+class Data_Acquisition(QObject):
     """Base class that runs in a separate thread"""
     # Signal must be a class attribute
     data_received = pyqtSignal(str, dict)  # (device_id, data)
@@ -21,7 +21,7 @@ class Data_Acquisition_Thread(QObject):
         self.running = False
 
 
-class VirtualDevice(Data_Acquisition_Thread):
+class VirtualDevice(Data_Acquisition):
     """Virtual device that emits data periodically"""
     
     def __init__(self, device_id: str, period_ms: int = 1000):

@@ -1,15 +1,14 @@
 import tango
 from PyQt6.QtWidgets import QApplication
-from PyQt6 import QtCore
 from PyQt6.QtCore import pyqtSlot
 import sys
 import qdarkstyle
 from Devices import DeviceMaker
 from Build_Interface import Monitoring_Interface
-from collections import deque
+from collections import deque, namedtuple
 import numpy as np
 
-
+DeviceData = namedtuple('DeviceData', ['x', 'y'])
 
 class Laser_Data(Monitoring_Interface):
 
@@ -53,13 +52,15 @@ class Laser_Data(Monitoring_Interface):
         for dev in self.device_list:
             try:
                 # Dictionary of device objects
-                self.devices[dev['name']] = DeviceMaker.create(dev)
+                device_id = dev['name']
+                self.devices[device_id] = DeviceMaker.create(dev)
 
-                self.devices[dev['name']].worker.data_received.connect(self._on_device_data)
-                self.devices[dev['name']].worker.error_occurred.connect(self._on_device_error)
-                self.add_graph(dev['name'])
+                self.devices[device_id].worker.data_received.connect(self._on_device_data)
+                self.devices[device_id].worker.error_occurred.connect(self._on_device_error)
+                self.add_graph(device_id)
                 # Dictionary of device data - not bundled with self.devices as it would make code unreadable
-                self.device_data[dev['name']] = (deque(maxlen=self._buffer_size), deque(maxlen=self._buffer_size))
+                self.device_data[device_id] = DeviceData(x = deque(maxlen=self._buffer_size), 
+                                                         y = deque(maxlen=self._buffer_size))
             except Exception as e:
                 print(e)
 
@@ -80,9 +81,11 @@ class Laser_Data(Monitoring_Interface):
     @pyqtSlot(str, dict)
     def _on_device_data(self, device_id: str, data: dict):
         """Handle data received from any device"""
-        self.device_data[device_id][0].append(data['timestamp'])
-        self.device_data[device_id][1].append(data['energy'])
-        self.update_graph(device_id, np.array(self.device_data[device_id][0]), np.array(self.device_data[device_id][1]))
+        self.device_data[device_id].x.append(data['timestamp'])
+        self.device_data[device_id].y.append(data['energy'])
+        self.update_graph(device_id, 
+                          np.array(self.device_data[device_id].x), 
+                          np.array(self.device_data[device_id].y))
             
     
     @pyqtSlot(str, str)
@@ -104,8 +107,6 @@ if __name__ == "__main__":
     laser_data = Laser_Data(polling_period=1)
     laser_data.load_config()
     laser_data.create_devices()
-    for dev_key in laser_data.devices:
-        print(laser_data.devices[dev_key])
     laser_data.start_all_devices()
     laser_data.show()
     appli.exec_()
