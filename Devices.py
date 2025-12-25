@@ -4,11 +4,12 @@ import numpy as np
 import random
 import Thread
 from PyQt6.QtWidgets import QWidget
-from PyQt6.QtCore import pyqtSignal, QThread
+from PyQt6.QtCore import QObject, pyqtSignal, QThread, QTimer
+import time 
 
 
 
-class Device(QWidget):
+class Device(QObject):
     """
     Base class for all devices
     """
@@ -18,12 +19,34 @@ class Device(QWidget):
         self.name = definition['name']
         self.address = definition['address']
         self.type = definition['type']
-        
+        # Create thread
+        self.thread = QThread()
 
+    def setup(self):
+        try:
+            self.device_proxy = DeviceProxy(self.address)
+        except Exception:
+            self.device_proxy = None
+            raise Exception(f"Could not connect to device: {self.name}")
+        
     @abstractmethod
     def get_data(self):
-        """Each device implements its own data retrieval"""
-        pass
+        if self.device_proxy:
+            for key in self.values:
+                self.values[key]=self.device_proxy.read_attribute(key).value
+          
+
+    
+    def start_device(self):
+        """Start the device thread"""
+        self.thread.start()
+
+    def stop_device(self):
+        """Stop the device thread"""
+        self.worker.running = False
+        time.sleep(1)
+        self.thread.quit()
+    
 
 
 
@@ -31,25 +54,13 @@ class Device(QWidget):
 class DummyDevice(Device):
     def __init__(self, definition: dict):
         super().__init__(definition)
-        period_ms = 100
+        period_ms = 500
+
+        # Thread setup
         self.worker = Thread.VirtualDevice(self.name, period_ms)
-         # Create thread
-        self.thread = QThread()
         self.worker.moveToThread(self.thread)
-        
         # Connect thread started signal to worker start method
         self.thread.started.connect(self.worker.start)
-
-      
-    def start_monitoring(self):
-        """Start the device thread"""
-        self.thread.start()
-    
-    def stop_monitoring(self):
-        """Stop the device thread"""
-        self.worker.stop()
-        self.thread.quit()
-        self.thread.wait()
 
 
 
@@ -57,20 +68,8 @@ class Spectrometer(Device):
     def __init__(self, definition: dict):
         super().__init__(definition)
         self.setup()
-        self.get_data()
-    def setup(self):
-        try:
-            self.device_proxy = DeviceProxy(self.address)
-        except Exception:
-            self.device_proxy = None
-            raise Exception(f"Could not connect to device: {self.name}")
-
-    def get_data(self):
-
-        if self.device_proxy:
-            self.wavelengths = self.device_proxy.read_attribute("lambda").value
-            self.spectrum = np.asarray(self.device_proxy.read_attribute("intensity").value)
-            print(f'Spectrum: {self.spectrum}')
+        self.values=dict({("lambda", []), ("intensity", [])})
+    
 
 
 class BeamAnalyzer(Device):
@@ -78,44 +77,18 @@ class BeamAnalyzer(Device):
         super().__init__(definition)
         self.properties = {}
         self.setup()
-        self.get_data()
+        self.values=dict({("Centroid X", []), ("Centroid X", []), 
+                          ('Max Intensity', []), ('Peak X', []), 
+                          ('Peak Y', []), ('Variance X',[]),
+                          ('Variance Y', [])})
 
-    def setup(self):
-        try:
-            self.device_proxy = DeviceProxy(self.address)
-        except Exception:
-            self.device_proxy = None
-            raise Exception(f"Could not connect to device: {self.name}")
-
-    def get_data(self):
-        # BeamAnalyzer-specific logic
-        if self.device_proxy:
-            self.properties['Centroid X'] = self.device_proxy.read_attribute("CentroidX").value
-            self.properties['Centroid Y'] = self.device_proxy.read_attribute("CentroidY").value
-            self.properties['Max Intensity'] = self.device_proxy.read_attribute("MaxIntensity").value
-            self.properties['Peak X'] = self.device_proxy.read_attribute("PeakX").value
-            self.properties['Peak Y'] = self.device_proxy.read_attribute("PeakY").value
-            self.properties['Variance X'] = self.device_proxy.read_attribute("VarianceX").value
-            self.properties['Variance Y'] = self.device_proxy.read_attribute("VarianceY").value
 
 class EnergyMeter(Device):
-    def __init__(self, definition: dict):
+    def __init__(self, definition: dict, is_virtual):
         super().__init__(definition)
         self.setup()
-        self.get_data()
+        self.values=dict({("energy_1", [])})
 
-    def setup(self):
-        try:
-            self.device_proxy = DeviceProxy(self.address)
-        except Exception:
-            self.device_proxy = None
-            raise Exception(f"Could not connect to device: {self.name}")
-
-    def get_data(self):
-        # Spectrometer-specific logic
-        if self.device_proxy:
-            self.energy = self.device_proxy.read_attribute("energy_1").value
-            print(f'Energy: {self.energy}')
 
 
 class DeviceMaker:
@@ -130,7 +103,7 @@ class DeviceMaker:
     def create(cls, definition: dict) -> Device:
         device_type = definition.get('type')
         device_class = cls._device_types.get(device_type)
-        
+         
 
         if not device_class:
             raise ValueError(f"Unknown device type: {device_type}")
