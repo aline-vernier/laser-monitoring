@@ -43,6 +43,8 @@ class VirtualDevice(Data_Acquisition_Thread):
                 'timestamp': QThread.currentThread().currentThreadId()
             }
             self.data_received.emit(self.device_id, data)
+        else:
+            self.stop()
     
     def stop(self):
         if self.timer:

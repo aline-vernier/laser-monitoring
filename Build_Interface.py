@@ -29,8 +29,7 @@ class Monitoring_Interface(QMainWindow):
         self.setup_interface()
         self.graphs = {}
         self.graph_widgets = {}
-        self.add_graph('This device')
-        self.add_graph('That device')
+
 
     def setup_interface(self):
         #####################################################################
@@ -41,7 +40,7 @@ class Monitoring_Interface(QMainWindow):
         self.setWindowIcon(QIcon(self.icon + 'LOA.png'))
         self.setStyleSheet(qdarkstyle.load_stylesheet(qt_api='pyqt6'))
         self.setWindowIcon(QIcon('./icons/LOA.png'))
-        self.setGeometry(100, 30, 1200, 300)
+        self.setGeometry(100, 30, 1200, 500)
 
         self.toolBar = self.addToolBar('tools')
         self.toolBar.setMovable(False)

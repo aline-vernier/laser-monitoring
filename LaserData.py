@@ -36,8 +36,14 @@ class Laser_Data(Monitoring_Interface):
         dummy_device = dict({('name', 'Dummy device 1'),
                              ('address', ""),
                              ('type', 'dummy device')})
+        dummy_device_2 = dict({('name', 'Dummy device 2'),
+                             ('address', ""),
+                             ('type', 'dummy device')})
+        dummy_device_3 = dict({('name', 'Dummy device 3'),
+                        ('address', ""),
+                        ('type', 'dummy device')})
 
-        self.device_list = [dummy_device]
+        self.device_list = [dummy_device, dummy_device_2]
 
     def create_devices(self):
         for dev in self.device_list:
@@ -46,6 +52,8 @@ class Laser_Data(Monitoring_Interface):
 
                 self.devices[dev['name']].worker.data_received.connect(self._on_device_data)
                 self.devices[dev['name']].worker.error_occurred.connect(self._on_device_error)
+                self.add_graph(dev['name'])
+                print(dev['name'])
             except Exception as e:
                 print(e)
 
