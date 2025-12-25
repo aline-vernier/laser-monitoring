@@ -18,12 +18,10 @@ class Laser_Data(Monitoring_Interface):
         self._buffer_size = 1000
 
     def setup(self):
-        try:
-            tango_host = tango.ApiUtil.get_env_var("TANGO_HOST")
-            print(f'Tango host: {tango_host}')
-            print(f'Tango version: {tango.__version__}')
-        except Exception as e:
-            print(f'Exception {e}, no tango host could be found')
+
+        tango_host = tango.ApiUtil.get_env_var("TANGO_HOST")
+        print(f'Tango host: {tango_host}')
+        print(f'Tango version: {tango.__version__}')
 
     def load_config(self):  # To load from JSON
         spectrometer = dict({('name', 'Spectrometer 1'),
@@ -45,8 +43,43 @@ class Laser_Data(Monitoring_Interface):
         for dev in self.device_list:
             try:
                 self.devices[dev['name']] = DeviceMaker.create(dev)
+
+                self.devices[dev['name']].worker.data_received.connect(self._on_device_data)
+                self.devices[dev['name']].worker.error_occurred.connect(self._on_device_error)
             except Exception as e:
                 print(e)
+
+    def start_all_devices(self):
+        """Start monitoring all devices"""
+        for device in self.devices.values():
+            device.start_monitoring()
+
+    
+    def stop_all_devices(self):
+        """Stop monitoring all devices"""
+        for device in self.devices.values():
+            device.stop_monitoring()
+
+    # ========================================================================
+    # SIGNAL HANDLERS (Slots)
+    # ========================================================================
+    
+    def _on_device_data(self, device_id: str, data: dict):
+        """Handle data received from any device"""
+        # This runs in the main thread (Qt automatically handles this)
+        display_text = " | ".join([f"{k}: {v:.2f}" if isinstance(v, float) 
+                                    else f"{k}: {v}" 
+                                    for k, v in data.items()])
+        print(display_text)
+    
+    def _on_device_error(self, device_id: str, error: str):
+        """Handle errors from any device"""
+        print('error')
+    
+    def closeEvent(self, event):
+        """Clean up when window closes"""
+        self.stop_all_devices()
+        event.accept()
 
 
 if __name__ == "__main__":
@@ -58,6 +91,7 @@ if __name__ == "__main__":
     laser_data.create_devices()
     for dev_key in laser_data.devices:
         print(laser_data.devices[dev_key])
+    laser_data.start_all_devices()
     laser_data.show()
     appli.exec_()
 
