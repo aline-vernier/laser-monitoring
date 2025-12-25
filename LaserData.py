@@ -1,10 +1,13 @@
 import tango
 from PyQt6.QtWidgets import QApplication
 from PyQt6 import QtCore
+from PyQt6.QtCore import pyqtSlot
 import sys
 import qdarkstyle
 from Devices import DeviceMaker
 from Build_Interface import Monitoring_Interface
+from collections import deque
+import numpy as np
 
 
 
@@ -16,6 +19,7 @@ class Laser_Data(Monitoring_Interface):
         self.devices = {}
         self.polling_period = polling_period
         self._buffer_size = 1000
+        self.device_data = {}
 
     def setup(self):
 
@@ -43,47 +47,50 @@ class Laser_Data(Monitoring_Interface):
                         ('address', ""),
                         ('type', 'dummy device')})
 
-        self.device_list = [dummy_device, dummy_device_2]
+        self.device_list = [dummy_device, dummy_device_2, dummy_device_3]
 
     def create_devices(self):
         for dev in self.device_list:
             try:
+                # Dictionary of device objects
                 self.devices[dev['name']] = DeviceMaker.create(dev)
 
                 self.devices[dev['name']].worker.data_received.connect(self._on_device_data)
                 self.devices[dev['name']].worker.error_occurred.connect(self._on_device_error)
                 self.add_graph(dev['name'])
-                print(dev['name'])
+                # Dictionary of device data - not bundled with self.devices as it would make code unreadable
+                self.device_data[dev['name']] = (deque(maxlen=self._buffer_size), deque(maxlen=self._buffer_size))
             except Exception as e:
                 print(e)
 
     def start_all_devices(self):
         """Start monitoring all devices"""
         for device in self.devices.values():
-            device.start_monitoring()
+            device.start_device()
 
     
     def stop_all_devices(self):
         """Stop monitoring all devices"""
         for device in self.devices.values():
-            device.stop_monitoring()
+            device.stop_device()
 
     # ========================================================================
     # SIGNAL HANDLERS (Slots)
     # ========================================================================
-    
+    @pyqtSlot(str, dict)
     def _on_device_data(self, device_id: str, data: dict):
         """Handle data received from any device"""
-        # This runs in the main thread (Qt automatically handles this)
-        display_text = " | ".join([f"{k}: {v:.2f}" if isinstance(v, float) 
-                                    else f"{k}: {v}" 
-                                    for k, v in data.items()])
-        print(display_text)
+        self.device_data[device_id][0].append(data['timestamp'])
+        self.device_data[device_id][1].append(data['energy'])
+        self.update_graph(device_id, np.array(self.device_data[device_id][0]), np.array(self.device_data[device_id][1]))
+            
     
+    @pyqtSlot(str, str)
     def _on_device_error(self, device_id: str, error: str):
         """Handle errors from any device"""
         print('error')
-    
+
+    @pyqtSlot()
     def closeEvent(self, event):
         """Clean up when window closes"""
         self.stop_all_devices()

@@ -1,5 +1,6 @@
 from PyQt6.QtCore import pyqtSignal, QThread, QTimer
 from PyQt6.QtCore import QObject, pyqtSignal, QThread, QTimer
+from datetime import datetime
 
 import random
 
@@ -40,11 +41,12 @@ class VirtualDevice(Data_Acquisition_Thread):
             # Simulate device data
             data = {
                 'energy': random.uniform(1500, 2000)/10,
-                'timestamp': QThread.currentThread().currentThreadId()
+                'timestamp': datetime.now().timestamp()
             }
             self.data_received.emit(self.device_id, data)
         else:
             self.stop()
+
     
     def stop(self):
         if self.timer:

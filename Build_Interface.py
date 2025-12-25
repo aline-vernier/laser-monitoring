@@ -29,6 +29,8 @@ class Monitoring_Interface(QMainWindow):
         self.setup_interface()
         self.graphs = {}
         self.graph_widgets = {}
+        self.graph_X = []
+        self.graph_Y = []
 
 
     def setup_interface(self):
@@ -106,6 +108,7 @@ class Monitoring_Interface(QMainWindow):
         # Store both in dictionaries with device_name as key
         self.graph_widgets[device_name] = graph_widget
         self.graphs[device_name] = plot
+
 
     def update_graph(self, device_name: str, x_data, y_data):
         """Update a specific device's graph"""
