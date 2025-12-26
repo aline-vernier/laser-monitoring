@@ -34,13 +34,14 @@ class VirtualDevice(Data_Acquisition):
         self.timer = QTimer()
         self.timer.timeout.connect(self._generate_data)
         self.timer.start(self.period_ms)
+        self._t0 = datetime.now().timestamp()
     
     def _generate_data(self):
         if self.running:
             # Simulate device data
             data = {
-                'energy': random.uniform(1500, 2000)/10,
-                'timestamp': datetime.now().timestamp()
+                'y': random.uniform(1500, 2000)/10,
+                'x': datetime.now().timestamp()-self._t0
             }
             self.data_received.emit(self.device_id, data)
         else:

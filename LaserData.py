@@ -5,10 +5,7 @@ import sys
 import qdarkstyle
 from Devices import DeviceMaker
 from Build_Interface import Monitoring_Interface
-from collections import deque, namedtuple
-import numpy as np
 
-DeviceData = namedtuple('DeviceData', ['x', 'y'])
 
 class Laser_Data(Monitoring_Interface):
 
@@ -53,16 +50,32 @@ class Laser_Data(Monitoring_Interface):
             try:
                 # Dictionary of device objects
                 device_id = dev['name']
-                self.devices[device_id] = DeviceMaker.create(dev)
+                device = DeviceMaker.create(dev)
+                self.devices[device_id] = device
 
-                self.devices[device_id].worker.data_received.connect(self._on_device_data)
-                self.devices[device_id].worker.error_occurred.connect(self._on_device_error)
-                self.add_graph(device_id)
-                # Dictionary of device data - not bundled with self.devices as it would make code unreadable
-                self.device_data[device_id] = DeviceData(x = deque(maxlen=self._buffer_size), 
-                                                         y = deque(maxlen=self._buffer_size))
+                self.connect_device_signals(device)
+                self._create_graph_for_device(device_id, device, device.graph_type)
+  
             except Exception as e:
                 print(e)
+
+    def _create_graph_for_device(self, device_id, device, graph_type):
+        graph_creators = {
+            'rolling_1d': self.add_rolling_graph,
+            #'static_1d': self.add_static_graph,
+            #'density_2d': self.add_density_graph,
+        }
+        
+        creator = graph_creators.get(graph_type)
+        if creator:
+            creator(device_id, device.labels)
+        else:
+            raise ValueError(f"Unknown graph type: {graph_type}")
+
+    def connect_device_signals(self, device):
+        """Connect device signals to slots"""
+        device.worker.data_received.connect(self._on_device_data)
+        device.worker.error_occurred.connect(self._on_device_error)
 
     def start_all_devices(self):
         """Start monitoring all devices"""
@@ -81,11 +94,26 @@ class Laser_Data(Monitoring_Interface):
     @pyqtSlot(str, dict)
     def _on_device_data(self, device_id: str, data: dict):
         """Handle data received from any device"""
-        self.device_data[device_id].x.append(data['timestamp'])
-        self.device_data[device_id].y.append(data['energy'])
-        self.update_graph(device_id, 
-                          np.array(self.device_data[device_id].x), 
-                          np.array(self.device_data[device_id].y))
+        #self.update_rolling_graph(device_id, 
+        #                        data['timestamp'], 
+        #                         data['energy'])
+
+        device = self.devices.get(device_id)
+        self._update_graph_for_device(device, data)
+        
+    def _update_graph_for_device(self, device, data):
+        graph_updaters = {
+            'rolling_1d': self.update_rolling_graph,
+            #'static_1d': self.add_static_graph,
+            #'density_2d': self.add_density_graph,
+        }
+        graph_type = device.graph_type
+        device_id = device.name
+        creator = graph_updaters.get(graph_type)
+        if creator:
+            creator(device_id, data)
+        else:
+            raise ValueError(f"Unknown graph type: {graph_type}")
             
     
     @pyqtSlot(str, str)
