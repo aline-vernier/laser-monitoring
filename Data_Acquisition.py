@@ -1,7 +1,6 @@
 from PyQt6.QtCore import pyqtSignal, QThread, QTimer
 from PyQt6.QtCore import QObject, pyqtSignal, QThread, QTimer
 from datetime import datetime
-
 import random
 
 

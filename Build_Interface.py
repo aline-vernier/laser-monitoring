@@ -25,19 +25,15 @@ class Monitoring_Interface(QMainWindow):
     def __init__(self, buffer_size: int=1000):
         super().__init__()
         p = pathlib.Path(__file__)
-        self.icon = str(p.parent.parent) + sepa + 'icons' + sepa
+        self.icon = str(p.parent) + sepa + 'icons' + sepa
         self.setup_interface()
         self.graphs = {}
         self.graph_widgets = {}
-        self.graph_X = []
-        self.graph_Y = []
-
 
     def setup_interface(self):
         #####################################################################
         #                   Window setup
         #####################################################################
-        self.isWinOpen = False
         self.setWindowTitle('Laser Monitoring')
         self.setWindowIcon(QIcon(self.icon + 'LOA.png'))
         self.setStyleSheet(qdarkstyle.load_stylesheet(qt_api='pyqt6'))
@@ -119,23 +115,16 @@ class Monitoring_Interface(QMainWindow):
 
     def get_graph(self, device_name: str):
         """Retrieve a specific graph by device name"""
-        return self.graphs.get(device_name)
+        pass
 
     def remove_graph(self, device_name: str):
         """Remove a graph and its widget"""
-        if device_name in self.graphs:
-            # Remove the widget from layout
-            self.vbox1.removeWidget(self.graph_widgets[device_name])
-            self.graph_widgets[device_name].deleteLater()
+        pass
 
-            # Remove from dictionaries
-            del self.graphs[device_name]
-            del self.graph_widgets[device_name]
 
 if __name__ == "__main__":
 
-    appli = QApplication(sys.argv)
-    appli.setStyleSheet(qdarkstyle.load_stylesheet(qt_api='pyqt6'))
+    appli = QApplication(sys.argv)   
     e= Monitoring_Interface()
     e.show()
     appli.exec_()
