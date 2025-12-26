@@ -16,6 +16,7 @@ import qdarkstyle
 import os
 import pathlib
 import numpy as np
+import Device_Classes.Rolling_Graph 
 
 sepa = os.sep
 
@@ -104,6 +105,29 @@ class Monitoring_Interface(QMainWindow):
         # Store both in dictionaries with device_name as key
         self.graph_widgets[device_name] = graph_widget
         self.graphs[device_name] = plot
+
+    def add_rolling_graph(self, device_name: str,device_labels: dict):
+
+        self.graphs[device_name] =  Device_Classes.Rolling_Graph.Rolling_Graph(device_labels)
+        self.graphs[device_name].set_labels()
+        rolling_graph = self.graphs[device_name]
+        self.vbox1.addWidget(rolling_graph.graph)
+        self.graph_widgets[device_name] = rolling_graph.graph
+  
+
+    def update_rolling_graph(self, device_name: str, data: dict):
+        """Update a specific device's rolling graph"""
+        #if device_name in self.graphs:
+        #    self.graphs[device_name].update_graph(data)
+        #    print(f'{self.graphs[device_name]}')
+        #else:
+        #    print(f"Warning: No rolling graph found for device '{device_name}'")
+        graph = self.graphs.get(device_name)
+        if graph:
+            graph.update_graph(data)
+        else:
+            print(f"Warning: No rolling graph found for device '{device_name}'")
+
 
 
     def update_graph(self, device_name: str, x_data, y_data):
