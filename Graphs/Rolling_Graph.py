@@ -9,8 +9,8 @@ Rolling Graph Device Class
 from PyQt6.QtWidgets import QWidget
 import pyqtgraph as pg
 from collections import deque
-import Colours
-from Device_Classes.Graph_StyleSheet import Dark_StyleSheet
+import Graphs.Colours as Colours
+from Graphs.Graph_StyleSheet import Dark_StyleSheet
 
 class Rolling_Graph(QWidget, Dark_StyleSheet):
 

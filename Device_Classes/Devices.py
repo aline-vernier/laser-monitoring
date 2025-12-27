@@ -1,10 +1,7 @@
 from abc import abstractmethod
 from tango import DeviceProxy
-import numpy as np
-import random
-import Data_Acquisition
-from PyQt6.QtWidgets import QWidget
-from PyQt6.QtCore import QObject, pyqtSignal, QThread, QTimer
+import Device_Classes.Data_Acquisition as Data_Acquisition
+from PyQt6.QtCore import QObject, QThread
 import time 
 
 
