@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Mon Mar 18 14:06:58 2019
+Created on Sat Dec 27 22:30:58 2025
 open('README.md').read()
 'PyQt6-sip== 13.5.2','PyQt6-qt6==6.5.1','PyQt6==6.5.1',
 @author: Aline Vernier
@@ -11,15 +11,15 @@ from setuptools import setup, find_packages
 
 This_directory = Path(__file__).parent
 long_description = (This_directory / "README.md").read_text()
-setup(name='laser_monitoring',version=2025.06,
+setup(name='laser_monitoring',version=2025.12,
       packages=find_packages(),
       author='Aline Vernier',
-      author_email='jaline.vernier@ensta.fr',
+      author_email='aline.vernier@ensta.fr',
       description='Laser Monitoring Application',
       long_description=long_description,
       long_description_content_type='text/markdown',
       include_package_data=True,
-      package_data={'laser-monitoring': ['icons/*.*', 'Graphs/*.*', 'Device_Classes/*.*', 'diagServer/*.*']},
+      package_data={'laser_monitoring': ['icons/*.*', 'Graphs/*.*', 'Device_Classes/*.*', 'diagServer/*.*']},
       classifiers=[
         "Programming Language :: Python :: 3",
         "License :: Free for non-commercial use",
