@@ -1,13 +1,17 @@
 import tango
 from PyQt6.QtWidgets import QApplication
 from PyQt6.QtCore import pyqtSlot
+from PyQt6 import QtCore
 import sys
 import qdarkstyle
 from Devices import DeviceMaker
 from Build_Interface import Monitoring_Interface
+from diagServer import diagServer
+
 
 
 class Laser_Data(Monitoring_Interface):
+    signalLaserDataDict = QtCore.pyqtSignal(object)
 
     def __init__(self, polling_period: float, buffer_size: int=1000):
         super().__init__(buffer_size)
@@ -16,6 +20,9 @@ class Laser_Data(Monitoring_Interface):
         self.polling_period = polling_period
         self._buffer_size = 1000
         self.device_data = {}
+
+        self.serv = diagServer(parent=self, data={"state":"starting..."}, name='LaserData') # init the server
+        self.serv.start() # start the server thread
 
     def setup(self):
 
@@ -97,6 +104,7 @@ class Laser_Data(Monitoring_Interface):
         """Handle data received from any device"""
         device = self.devices.get(device_id)
         self._update_graph_for_device(device, data)
+        self.signalLaserDataDict.emit(dict(device_id=device_id, data=data)) # Signal for DiagServ
         
     def _update_graph_for_device(self, device, data):
         graph_updaters = {
