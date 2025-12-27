@@ -36,7 +36,6 @@ class Device(QObject):
                 self.values[key]=self.device_proxy.read_attribute(key).value
           
 
-    
     def start_device(self):
         """Start the device thread"""
         self.thread.start()
@@ -51,7 +50,7 @@ class Device(QObject):
 class DummyDevice(Device):
     def __init__(self, definition: dict):
         super().__init__(definition)
-        period_ms = 200
+        period_ms = 1000
         self.labels = {'x_label': 'Time', 
                        'y_label': 'Signal', 'x_units': 's', 'y_units': 'V'}
         self.graph_type = 'rolling_1d'

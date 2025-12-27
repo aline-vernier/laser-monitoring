@@ -27,6 +27,7 @@ class Monitoring_Interface(QMainWindow):
         super().__init__()
         p = pathlib.Path(__file__)
         self.icon = str(p.parent) + sepa + 'icons' + sepa
+        print(f'Icon path: {self.icon + "LOA.png"}')
         self.setup_interface()
         self.graphs = {}
         self.graph_widgets = {}
@@ -38,7 +39,6 @@ class Monitoring_Interface(QMainWindow):
         self.setWindowTitle('Laser Monitoring')
         self.setWindowIcon(QIcon(self.icon + 'LOA.png'))
         self.setStyleSheet(qdarkstyle.load_stylesheet(qt_api='pyqt6'))
-        self.setWindowIcon(QIcon('./icons/LOA.png'))
         self.setGeometry(100, 30, 1200, 500)
 
         self.toolBar = self.addToolBar('tools')
@@ -68,8 +68,6 @@ class Monitoring_Interface(QMainWindow):
         self.hbox = QHBoxLayout()
         MainWidget = QWidget()
         MainWidget.setLayout(self.hbox)
-        b0 = QLabel('')
-        b1 = QLabel('')
         self.setCentralWidget(MainWidget)
 
         # LHS vertical box with stacked graphs
@@ -90,15 +88,18 @@ class Monitoring_Interface(QMainWindow):
         self.vbox2.addWidget(title_label)
 
 
+    ############################################
+    #                   Graphs
+    ############################################
+
     ######################
-    #       Graphs
+    #   Rolling Graph
     ######################
 
     def add_rolling_graph(self, device_name: str,device_labels: dict):
 
-        self.graphs[device_name] =  Device_Classes.Rolling_Graph.Rolling_Graph(device_labels)
-        self.graphs[device_name].set_labels()
-        rolling_graph = self.graphs[device_name]
+        rolling_graph = Device_Classes.Rolling_Graph.Rolling_Graph(device_labels)    
+        self.graphs[device_name] =  rolling_graph
         self.vbox1.addWidget(rolling_graph.graph)
         self.graph_widgets[device_name] = rolling_graph.graph
   
@@ -111,6 +112,9 @@ class Monitoring_Interface(QMainWindow):
         else:
             print(f"Warning: No rolling graph found for device '{device_name}'")
 
+    ######################
+    #   1D Graph
+    ######################
 
     def get_graph(self, device_name: str):
         """Retrieve a specific graph by device name"""
