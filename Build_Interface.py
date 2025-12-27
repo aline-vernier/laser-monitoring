@@ -93,18 +93,6 @@ class Monitoring_Interface(QMainWindow):
     ######################
     #       Graphs
     ######################
-    def add_graph(self, device_name: str):
-        # Create the graphics widget
-        graph_widget = pg.GraphicsLayoutWidget()
-        self.vbox1.addWidget(graph_widget)
-
-        # Create the plot
-        plot = graph_widget.addPlot()
-        plot.setContentsMargins(10, 10, 10, 10)
-
-        # Store both in dictionaries with device_name as key
-        self.graph_widgets[device_name] = graph_widget
-        self.graphs[device_name] = plot
 
     def add_rolling_graph(self, device_name: str,device_labels: dict):
 
@@ -117,25 +105,12 @@ class Monitoring_Interface(QMainWindow):
 
     def update_rolling_graph(self, device_name: str, data: dict):
         """Update a specific device's rolling graph"""
-        #if device_name in self.graphs:
-        #    self.graphs[device_name].update_graph(data)
-        #    print(f'{self.graphs[device_name]}')
-        #else:
-        #    print(f"Warning: No rolling graph found for device '{device_name}'")
         graph = self.graphs.get(device_name)
         if graph:
             graph.update_graph(data)
         else:
             print(f"Warning: No rolling graph found for device '{device_name}'")
 
-
-
-    def update_graph(self, device_name: str, x_data, y_data):
-        """Update a specific device's graph"""
-        if device_name in self.graphs:
-            self.graphs[device_name].plot(x_data, y_data, clear=True)
-        else:
-            print(f"Warning: No graph found for device '{device_name}'")
 
     def get_graph(self, device_name: str):
         """Retrieve a specific graph by device name"""

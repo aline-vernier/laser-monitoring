@@ -54,18 +54,19 @@ class Laser_Data(Monitoring_Interface):
                 self.devices[device_id] = device
 
                 self.connect_device_signals(device)
-                self._create_graph_for_device(device_id, device, device.graph_type)
+                self._create_graph_for_device(device)
   
             except Exception as e:
                 print(e)
 
-    def _create_graph_for_device(self, device_id, device, graph_type):
+    def _create_graph_for_device(self, device):
         graph_creators = {
             'rolling_1d': self.add_rolling_graph,
             #'static_1d': self.add_static_graph,
             #'density_2d': self.add_density_graph,
         }
-        
+        graph_type = device.graph_type
+        device_id = device.name
         creator = graph_creators.get(graph_type)
         if creator:
             creator(device_id, device.labels)
@@ -94,10 +95,6 @@ class Laser_Data(Monitoring_Interface):
     @pyqtSlot(str, dict)
     def _on_device_data(self, device_id: str, data: dict):
         """Handle data received from any device"""
-        #self.update_rolling_graph(device_id, 
-        #                        data['timestamp'], 
-        #                         data['energy'])
-
         device = self.devices.get(device_id)
         self._update_graph_for_device(device, data)
         

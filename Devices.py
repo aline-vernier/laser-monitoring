@@ -44,7 +44,7 @@ class Device(QObject):
     def stop_device(self):
         """Stop the device thread"""
         self.worker.running = False
-        time.sleep(1)
+        time.sleep(.5)
         self.thread.quit()
 
 

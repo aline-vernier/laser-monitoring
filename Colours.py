@@ -1,0 +1,7 @@
+muted_blue = '#4a9eff' # Muted blue (softer than bright cyan)
+forest_green = '#48bb78' # Forest green (darker mint)
+muted_coral = '#ed8936' # Burnt orange (muted coral)
+dark_lavender = '#9f7aea' # Deep purple (darker lavender)
+teal = '#38b2ac' # Teal (sophisticated blue-green)
+rose = '#f687b3' # Rose (muted pink)
+amber = '#ecc94b' # Amber (darker yellow)
