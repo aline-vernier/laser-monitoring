@@ -8,10 +8,10 @@ open('README.md').read()
 """
 from pathlib import Path 
 from setuptools import setup, find_packages
-#import visu
+
 This_directory = Path(__file__).parent
 long_description = (This_directory / "README.md").read_text()
-setup(name='laser-monitoring',version=2025.06,
+setup(name='laser_monitoring',version=2025.06,
       packages=find_packages(),
       author='Aline Vernier',
       author_email='jaline.vernier@ensta.fr',
@@ -19,7 +19,7 @@ setup(name='laser-monitoring',version=2025.06,
       long_description=long_description,
       long_description_content_type='text/markdown',
       include_package_data=True,
-      package_data={'laser-monitoring': ['incons/*.*']},
+      package_data={'laser-monitoring': ['icons/*.*', 'Graphs/*.*', 'Device_Classes/*.*', 'diagServer/*.*']},
       classifiers=[
         "Programming Language :: Python :: 3",
         "License :: Free for non-commercial use",

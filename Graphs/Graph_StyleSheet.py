@@ -1,4 +1,4 @@
-import Graphs.Colours as Colours   
+import Graphs.Colours as Colours
 import pyqtgraph as pg
 
 

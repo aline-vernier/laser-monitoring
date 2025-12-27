@@ -2,12 +2,12 @@
 import Graphs.Colours as Colours
 from Graphs.Graph_StyleSheet import Dark_StyleSheet
 from Device_Classes.Devices import Device
+import Device_Classes.Devices as Devices
 
 from PyQt6.QtWidgets import QWidget
 import pyqtgraph as pg
 from collections import deque
 from abc import abstractmethod
-
 
 
 class Graph:
@@ -22,9 +22,9 @@ class Graph:
         pass
 
 
-class Rolling_Graph(QWidget, Dark_StyleSheet):
+class Rolling_Graph(QWidget,Graph, Dark_StyleSheet):
     def __init__(self, device: Device):
-        super().__init__(device)
+        super().__init__(device=device)
         
         self.x = deque(maxlen=1000)
         self.y = deque(maxlen=1000)
@@ -75,7 +75,7 @@ if __name__ == "__main__":
     device_def = dict({('name', 'Dummy device 1'),
                              ('address', ""),
                              ('type', 'dummy device')})
-    device = Device.DeviceMaker.create(device_def)
+    device = Devices.DeviceMaker.create(device_def)
     graph = Rolling_Graph(device)
     graph.graph.setGeometry(100, 30, 800, 400)
     graph.graph.show()
