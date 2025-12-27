@@ -16,7 +16,7 @@ import qdarkstyle
 import os
 import pathlib
 import numpy as np
-import Device_Classes.Rolling_Graph 
+import Graphs.Rolling_Graph 
 
 sepa = os.sep
 
@@ -98,7 +98,7 @@ class Monitoring_Interface(QMainWindow):
 
     def add_rolling_graph(self, device_name: str,device_labels: dict):
 
-        rolling_graph = Device_Classes.Rolling_Graph.Rolling_Graph(device_labels)    
+        rolling_graph = Graphs.Rolling_Graph.Rolling_Graph(device_labels)    
         self.graphs[device_name] =  rolling_graph
         self.vbox1.addWidget(rolling_graph.graph)
         self.graph_widgets[device_name] = rolling_graph.graph

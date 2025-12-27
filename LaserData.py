@@ -4,9 +4,9 @@ from PyQt6.QtCore import pyqtSlot
 from PyQt6 import QtCore
 import sys
 import qdarkstyle
-from Devices import DeviceMaker
+from Device_Classes.Devices import DeviceMaker
 from Build_Interface import Monitoring_Interface
-from diagServer import diagServer
+from diagServer.diagServer import diagServer
 
 
 
