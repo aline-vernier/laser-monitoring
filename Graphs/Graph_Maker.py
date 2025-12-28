@@ -56,20 +56,23 @@ class GraphMaker:
     _graph_types = {
         'rolling_1d': Rolling_Graph,
         'static_1d': Static_Graph,
-        'density_2d': Density_Graph
-    }
+        'density_2d': Density_Graph}
 
     @classmethod
     def create(cls, device: Device) -> Graph:
         graph_type = device.graph_type
-        graph_type_class = cls._graph_types.get(graph_type)
-         
-
+        graph_type_class = cls._graph_types.get(graph_type)         
         if not graph_type_class:
             raise ValueError(f"Unknown graph type: {graph_type}")
-
         return graph_type_class(device)
-
+    
+class GraphUpdater:
+    def __init__(self, graph: Graph):
+        self.graph = graph
+    
+    def update(self, data: dict):
+        """Update the graph with new data - delegates to graph's own method"""
+        self.graph.update_graph(data)
 
 if __name__ == "__main__":
     app = pg.mkQApp()

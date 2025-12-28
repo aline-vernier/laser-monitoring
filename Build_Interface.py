@@ -14,8 +14,8 @@ import sys
 import qdarkstyle
 import os
 import pathlib
-import Graphs.Rolling_Graph 
 import Graphs.Graph_Maker
+from Graphs.Graph_Maker import GraphUpdater
 from Device_Classes.Devices import Device 
 
 sepa = os.sep
@@ -97,29 +97,13 @@ class Monitoring_Interface(QMainWindow):
         self.vbox1.addWidget(graph.graph)
         self.graph_widgets[device.name] = graph.graph   
 
-    ######################
-    #   Rolling Graph
-    ######################
-
-    def add_rolling_graph(self, device_name: str,device_labels: dict):
-
-        rolling_graph = Graphs.Rolling_Graph.Rolling_Graph(device_labels)    
-        self.graphs[device_name] =  rolling_graph
-        self.vbox1.addWidget(rolling_graph.graph)
-        self.graph_widgets[device_name] = rolling_graph.graph
-  
-
-    def update_rolling_graph(self, device_name: str, data: dict):
-        """Update a specific device's rolling graph"""
-        graph = self.graphs.get(device_name)
+    def update_graph(self, device: Device, data: dict):
+        graph = self.graphs.get(device.name)
         if graph:
-            graph.update_graph(data)
+            GraphUpdater(graph).update(data)
         else:
-            print(f"Warning: No rolling graph found for device '{device_name}'")
+            print(f"Warning: No graph found for device '{device.name}'")
 
-    ######################
-    #   1D Graph
-    ######################
 
     def get_graph(self, device_name: str):
         """Retrieve a specific graph by device name"""
