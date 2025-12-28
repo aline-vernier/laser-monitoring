@@ -53,3 +53,30 @@ class VirtualDevice(Data_Acquisition):
             self.timer.stop()
         super().stop()
 
+class VirtualDevice_2(Data_Acquisition):
+    def start(self):
+        """Called when moved to thread"""
+        self.running = True
+        self.period_ms = 100  # Set default period if not set
+        self._t0 = datetime.now().timestamp()
+        self._generate_data()  # Start the cycle
+
+    def _generate_data(self):
+        if not self.running:
+            self.finished.emit()
+            return
+        
+        # Generate and emit data
+        data = {
+            'y': random.uniform(1500, 2000)/10,
+            'x': datetime.now().timestamp() - self._t0
+        }
+        self.data_received.emit(self.device_id, data)
+        
+        # Schedule next call
+        QTimer.singleShot(self.period_ms, self._generate_data)
+    
+    def stop(self):
+        """Stop will prevent next timer from firing"""
+        self.running = False
+        # No need to stop a timer - just don't reschedule
