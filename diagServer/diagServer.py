@@ -129,7 +129,8 @@ class diagServer(threading.Thread):
         print(f'Spectrometer dictionary: {spectro_data_dict}')
 
     def _foo_bar(self, laser_data_dict):
-        print(f'LaserData dictionary: {laser_data_dict}')
+        #print(f'LaserData dictionary: {laser_data_dict}')
+        pass
 
 
 

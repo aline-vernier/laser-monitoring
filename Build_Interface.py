@@ -77,7 +77,7 @@ class Monitoring_Interface(QMainWindow):
         self.vbox2 = QVBoxLayout()
         self.vbox2widget = QWidget()
         self.vbox2widget.setLayout(self.vbox2)
-        self.vbox2widget.setFixedWidth(100)
+        #self.vbox2widget.setFixedWidth(200)
         self.hbox.addWidget(self.vbox2widget)
 
         # Title
@@ -94,7 +94,10 @@ class Monitoring_Interface(QMainWindow):
     def add_graph(self, device: Device):
         graph = Graphs.Graph_Maker.GraphMaker.create(device)    
         self.graphs[device.name] = graph
-        self.vbox1.addWidget(graph.graph)
+        if type(graph) is Graphs.Graph_Maker.Density_Graph:
+            self.vbox2.addWidget(graph.graph)
+        else:
+            self.vbox1.addWidget(graph.graph)
         self.graph_widgets[device.name] = graph.graph   
 
     def update_graph(self, device: Device, data: dict):
