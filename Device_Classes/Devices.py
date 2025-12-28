@@ -40,7 +40,7 @@ class Device(QObject):
     def stop_device(self):
         """Stop the device thread"""
         self.worker.running = False
-        time.sleep(1)
+        #time.sleep(1)
         self.thread.quit()
 
 
@@ -53,7 +53,8 @@ class DummyDevice(Device):
         self.graph_type = 'rolling_1d'
 
         # Thread setup
-        self.worker = Data_Acquisition.VirtualDevice(self.name, period_ms)
+        #self.worker = Data_Acquisition.VirtualDevice_2(self.name, period_ms)
+        self.worker = Data_Acquisition.VirtualDevice_2(self.name)
         self.worker.moveToThread(self.thread)
         # Connect thread started signal to worker start method
         self.thread.started.connect(self.worker.start)
