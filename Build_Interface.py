@@ -11,18 +11,17 @@ from PyQt6.QtWidgets import (QLabel, QMainWindow, QStatusBar, QComboBox,
 from PyQt6.QtGui import QIcon, QFont
 from PyQt6.QtCore import Qt
 import sys
-import pyqtgraph as pg
 import qdarkstyle
 import os
 import pathlib
-import numpy as np
 import Graphs.Rolling_Graph 
+import Graphs.Graph_Maker
+from Device_Classes.Devices import Device 
 
 sepa = os.sep
 
 
 class Monitoring_Interface(QMainWindow):
-
     def __init__(self, buffer_size: int=1000):
         super().__init__()
         p = pathlib.Path(__file__)
@@ -91,6 +90,12 @@ class Monitoring_Interface(QMainWindow):
     ############################################
     #                   Graphs
     ############################################
+
+    def add_graph(self, device: Device):
+        graph = Graphs.Graph_Maker.GraphMaker.create(device)    
+        self.graphs[device.name] = graph
+        self.vbox1.addWidget(graph.graph)
+        self.graph_widgets[device.name] = graph.graph   
 
     ######################
     #   Rolling Graph

@@ -12,7 +12,6 @@ from diagServer.diagServer import diagServer
 
 class Laser_Data(Monitoring_Interface):
     signalLaserDataDict = QtCore.pyqtSignal(object)
-
     def __init__(self, polling_period: float, buffer_size: int=1000):
         super().__init__(buffer_size)
         self.setup()
@@ -61,24 +60,10 @@ class Laser_Data(Monitoring_Interface):
                 self.devices[device_id] = device
 
                 self.connect_device_signals(device)
-                self._create_graph_for_device(device)
+                self.add_graph(device)
   
             except Exception as e:
                 print(e)
-
-    def _create_graph_for_device(self, device):
-        graph_creators = {
-            'rolling_1d': self.add_rolling_graph,
-            #'static_1d': self.add_static_graph,
-            #'density_2d': self.add_density_graph,
-        }
-        graph_type = device.graph_type
-        device_id = device.name
-        creator = graph_creators.get(graph_type)
-        if creator:
-            creator(device_id, device.labels)
-        else:
-            raise ValueError(f"Unknown graph type: {graph_type}")
 
     def connect_device_signals(self, device):
         """Connect device signals to slots"""
