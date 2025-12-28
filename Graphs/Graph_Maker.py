@@ -62,7 +62,6 @@ class GraphMaker:
     @classmethod
     def create(cls, device: Device) -> Graph:
         graph_type = device.graph_type
-        print(graph_type)
         graph_type_class = cls._graph_types.get(graph_type)
          
 
