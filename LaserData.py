@@ -43,10 +43,10 @@ class Laser_Data(Monitoring_Interface):
                              ('type', 'dummy device')})
         dummy_device_2 = dict({('name', 'Dummy device 2'),
                              ('address', ""),
-                             ('type', 'dummy device')})
+                             ('type', 'dummy device 1D')})
         dummy_device_3 = dict({('name', 'Dummy device 3'),
                         ('address', ""),
-                        ('type', 'dummy device')})
+                        ('type', 'dummy device 2D')})
 
         self.device_list = [dummy_device, dummy_device_2, dummy_device_3]
 
@@ -73,7 +73,6 @@ class Laser_Data(Monitoring_Interface):
         """Start monitoring all devices"""
         for device in self.devices.values():
             device.start_device()
-
     
     def stop_all_devices(self):
         """Stop monitoring all devices"""

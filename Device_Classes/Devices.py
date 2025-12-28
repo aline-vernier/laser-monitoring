@@ -47,17 +47,39 @@ class Device(QObject):
 class DummyDevice(Device):
     def __init__(self, definition: dict):
         super().__init__(definition)
-        period_ms = 1000
         self.labels = {'x_label': 'Time', 
                        'y_label': 'Signal', 'x_units': 's', 'y_units': 'V'}
         self.graph_type = 'rolling_1d'
 
-        # Thread setup
-        #self.worker = Data_Acquisition.VirtualDevice_2(self.name, period_ms)
-        self.worker = Data_Acquisition.VirtualDevice_2(self.name)
+        self.worker = Data_Acquisition.VirtualDevice(parent=self)
         self.worker.moveToThread(self.thread)
         # Connect thread started signal to worker start method
         self.thread.started.connect(self.worker.start)
+
+class DummyDevice1D(Device):
+    def __init__(self, definition: dict):
+        super().__init__(definition)
+        self.labels = {'x_label': 'Time', 
+                       'y_label': 'Signal', 'x_units': 's', 'y_units': 'V'}
+        self.graph_type = 'static_1d'
+
+        self.worker = Data_Acquisition.VirtualDevice(parent=self)
+        self.worker.moveToThread(self.thread)
+        # Connect thread started signal to worker start method
+        self.thread.started.connect(self.worker.start)
+
+class DummyDevice2D(Device):
+    def __init__(self, definition: dict):
+        super().__init__(definition)
+        self.labels = {'x_label': 'x', 
+                       'y_label': 'y', 'x_units': 'px', 'y_units': 'px'}
+        self.graph_type = 'density_2d'
+
+        self.worker = Data_Acquisition.VirtualDevice(parent=self)
+        self.worker.moveToThread(self.thread)
+        # Connect thread started signal to worker start method
+        self.thread.started.connect(self.worker.start)
+
 
 
 class Spectrometer(Device):
@@ -92,7 +114,9 @@ class DeviceMaker:
         'spectrometer': Spectrometer,
         'beam analyzer': BeamAnalyzer,
         'energy meter': EnergyMeter,
-        'dummy device' : DummyDevice
+        'dummy device' : DummyDevice,
+        'dummy device 1D' : DummyDevice1D,
+        'dummy device 2D' : DummyDevice2D,
     }
 
     @classmethod

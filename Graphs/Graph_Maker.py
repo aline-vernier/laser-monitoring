@@ -45,11 +45,39 @@ class Rolling_Graph(Graph, Dark_StyleSheet):
         self.plot.clear()
         self.plot.plot(list(self.x), list(self.y), pen=pg.mkPen(color=Colours.muted_blue, width=2))
 
-class Static_Graph:
-    pass
-class Density_Graph:
-    pass
+class Static_Graph(Graph, Dark_StyleSheet):
+    def __init__(self, device: Device):
+        super().__init__(device)
+        
+        self.graph = pg.GraphicsLayoutWidget()
+        self.plot = self.graph.addPlot()
+        self.plot.setContentsMargins(10, 10, 10, 10)
+        self.set_dark_mode()
+        self.set_labels() # From Dark_StyleSheet
+   
 
+    def update_graph(self, data: dict):
+        self.x = data.get('x', 0)
+        self.y = data.get('y', 0)
+        self.plot.clear()
+        self.plot.plot(list(self.x), list(self.y), pen=pg.mkPen(color=Colours.muted_blue, width=2))
+
+class Density_Graph(Graph, Dark_StyleSheet):
+    def __init__(self, device: Device):
+        super().__init__(device)
+        
+        self.graph = pg.GraphicsLayoutWidget()
+        self.plot = self.graph.addPlot()
+        self.img_item = pg.ImageItem()
+        self.plot.addItem(self.img_item)
+        self.plot.setContentsMargins(10, 10, 10, 10)
+        self.set_dark_mode()
+        self.set_labels() # From Dark_StyleSheet
+
+    def update_graph(self, data: dict):
+        image = data.get('image', None)
+        if image is not None:
+            self.img_item.setImage(image.T)  # Transpose for correct orientation
 
 
 class GraphMaker:
