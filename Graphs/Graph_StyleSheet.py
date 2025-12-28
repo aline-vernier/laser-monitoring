@@ -6,6 +6,8 @@ class Dark_StyleSheet:
     """
     Dark Style Sheet for Graphs
     """
+
+
     def set_dark_mode(self):
         self.plot.showGrid(x=True, y=True, alpha=0.2)
         self.graph.setBackground('#1e1e1e') 

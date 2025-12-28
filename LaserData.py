@@ -9,7 +9,6 @@ from Build_Interface import Monitoring_Interface
 from diagServer.diagServer import diagServer
 
 
-
 class Laser_Data(Monitoring_Interface):
     signalLaserDataDict = QtCore.pyqtSignal(object)
     def __init__(self, polling_period: float, buffer_size: int=1000):
@@ -17,7 +16,7 @@ class Laser_Data(Monitoring_Interface):
         self.setup()
         self.devices = {}
         self.polling_period = polling_period
-        self._buffer_size = 1000
+        self._buffer_size = buffer_size
         self.device_data = {}
 
         self.serv = diagServer(parent=self, data={"state":"starting..."}, name='LaserData') # init the server
@@ -88,24 +87,9 @@ class Laser_Data(Monitoring_Interface):
     def _on_device_data(self, device_id: str, data: dict):
         """Handle data received from any device"""
         device = self.devices.get(device_id)
-        self._update_graph_for_device(device, data)
+        self.update_graph(device, data)
         self.signalLaserDataDict.emit(dict(device_id=device_id, data=data)) # Signal for DiagServ
         
-    def _update_graph_for_device(self, device, data):
-        graph_updaters = {
-            'rolling_1d': self.update_rolling_graph,
-            #'static_1d': self.add_static_graph,
-            #'density_2d': self.add_density_graph,
-        }
-        graph_type = device.graph_type
-        device_id = device.name
-        creator = graph_updaters.get(graph_type)
-        if creator:
-            creator(device_id, data)
-        else:
-            raise ValueError(f"Unknown graph type: {graph_type}")
-            
-    
     @pyqtSlot(str, str)
     def _on_device_error(self, device_id: str, error: str):
         """Handle errors from any device"""
@@ -115,6 +99,7 @@ class Laser_Data(Monitoring_Interface):
     def closeEvent(self, event):
         """Clean up when window closes"""
         self.stop_all_devices()
+        self.serv.stop()
         event.accept()
 
 
