@@ -1,3 +1,4 @@
+from matplotlib.pyplot import plot
 from Graphs.Colours import *
 import random
 import pyqtgraph as pg
@@ -30,4 +31,12 @@ class Dark_StyleSheet():
     def set_labels(self):
         label_style = {'color': silver, 'font-size': '10pt', 'font-family': 'Sergoe UI'}
         self.plot.setLabel('bottom', self.x_label, units=self.x_units, **label_style)
-        self.plot.setLabel('left', self.y_label, units=self.y_units, **label_style)    
+        self.plot.setLabel('left', self.y_label, units=self.y_units, **label_style)  
+
+    def set_2D_plot_darkstyle(self):
+        self.graph.setBackground(anthracite) 
+        # Color map for 2D plots
+        self.plot.addColorBar(self.img_item, colorMap='viridis') 
+        self.plot.vb.setAspectLocked(True, 1)
+
+

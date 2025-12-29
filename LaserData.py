@@ -35,7 +35,7 @@ class Laser_Data(Monitoring_Interface):
         # Read configuration back from file
         loaded_config = readConfig(config_file_path)
         self.device_list = [loaded_config[key] for key in loaded_config]
-
+ 
 
     def create_devices(self):
         for dev in self.device_list:
