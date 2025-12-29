@@ -47,8 +47,11 @@ class Laser_Data(Monitoring_Interface):
         dummy_device_3 = dict({('name', 'Dummy device 3'),
                         ('address', ""),
                         ('type', 'dummy device 2D')})
+        dummy_device_4 = dict({('name', 'Dummy device 4'),
+                        ('address', ""),
+                        ('type', 'dummy device 2D')})
 
-        self.device_list = [dummy_device, dummy_device_2, dummy_device_3]
+        self.device_list = [dummy_device, dummy_device_2, dummy_device_3, dummy_device_4]
 
     def create_devices(self):
         for dev in self.device_list:
@@ -79,9 +82,9 @@ class Laser_Data(Monitoring_Interface):
         for device in self.devices.values():
             device.stop_device()
 
-    # ========================================================================
-    # SIGNAL HANDLERS (Slots)
-    # ========================================================================
+    #######################################################################
+    #                    SIGNAL HANDLERS (Slots)
+    #######################################################################
     @pyqtSlot(str, dict)
     def _on_device_data(self, device_id: str, data: dict):
         """Handle data received from any device"""

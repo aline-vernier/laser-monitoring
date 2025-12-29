@@ -12,6 +12,9 @@ from abc import abstractmethod
 
 class Graph(QWidget):
     def __init__(self, device: Device):
+
+        self.graph = pg.GraphicsLayoutWidget()
+        self.plot = self.graph.addPlot()
         
         self.x_label= device.labels.get('x_label', 'Time')
         self.y_label= device.labels.get('y_label', 'Signal')
@@ -29,29 +32,22 @@ class Rolling_Graph(Graph, Dark_StyleSheet):
         
         self.x = deque(maxlen=1000)
         self.y = deque(maxlen=1000)
-
-        self.graph = pg.GraphicsLayoutWidget()
-        self.plot = self.graph.addPlot()
-        self.plot.setContentsMargins(10, 10, 10, 10)
         self.set_dark_mode()
         self.set_labels() # From Dark_StyleSheet
    
 
     def update_graph(self, data: dict):
-        new_x = data.get('x', 0)
-        new_y = data.get('y', 0)
-        self.x.append(new_x)
-        self.y.append(new_y)
-        self.plot.clear()
-        self.plot.plot(list(self.x), list(self.y), pen=pg.mkPen(color=Colours.muted_blue, width=2))
+        x = data.get('x', 0)
+        y = data.get('y', 0)
+        self.x.append(x)
+        self.y.append(y)
+        #self.plot.clear()
+        #self.plot.plot(list(self.x), list(self.y), pen=pg.mkPen(color=Colours.muted_blue, width=2))
+        self.curve.setData(list(self.x), list(self.y))
 
 class Static_Graph(Graph, Dark_StyleSheet):
     def __init__(self, device: Device):
         super().__init__(device)
-        
-        self.graph = pg.GraphicsLayoutWidget()
-        self.plot = self.graph.addPlot()
-        self.plot.setContentsMargins(10, 10, 10, 10)
         self.set_dark_mode()
         self.set_labels() # From Dark_StyleSheet
    
@@ -59,18 +55,16 @@ class Static_Graph(Graph, Dark_StyleSheet):
     def update_graph(self, data: dict):
         self.x = data.get('x', 0)
         self.y = data.get('y', 0)
-        self.plot.clear()
-        self.plot.plot(list(self.x), list(self.y), pen=pg.mkPen(color=Colours.muted_blue, width=2))
+        #self.plot.clear()
+        #self.plot.plot(list(self.x), list(self.y), pen=pg.mkPen(color=Colours.muted_blue, width=2))
+        self.curve.setData(list(self.x), list(self.y))
 
 class Density_Graph(Graph, Dark_StyleSheet):
     def __init__(self, device: Device):
         super().__init__(device)
         
-        self.graph = pg.GraphicsLayoutWidget()
-        self.plot = self.graph.addPlot()
         self.img_item = pg.ImageItem()
         self.plot.addItem(self.img_item)
-        self.plot.setContentsMargins(10, 10, 10, 10)
         self.set_dark_mode()
         self.set_labels() # From Dark_StyleSheet
 
