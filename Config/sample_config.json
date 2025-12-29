@@ -1,0 +1,32 @@
+{
+    "device_1": {
+        "name": "Spectrometer 1",
+        "address": "SY-SPECTRO_1/Spectrometer/FE1",
+        "type": "spectrometer"
+    },
+    "device_2": {
+        "name": "Beam Analyzer 1",
+        "address": "FE_CAMERA_1/ImgBeamAnalyzer/1",
+        "type": "beam analyzer"
+    },
+    "device_3": {
+        "name": "Energy Meter 1",
+        "address": "FE_EM_1/Energymeter/1",
+        "type": "energy meter"
+    },
+    "device_4": {
+        "name": "Dummy device 1",
+        "address": "",
+        "type": "dummy device"
+    },
+    "device_5": {
+        "name": "Dummy device 2",
+        "address": "",
+        "type": "dummy device 1D"
+    },
+    "device_6": {
+        "name": "Dummy device 3",
+        "address": "",
+        "type": "dummy device 2D"
+    }
+}

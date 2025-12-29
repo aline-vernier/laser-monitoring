@@ -7,6 +7,7 @@ import qdarkstyle
 from Device_Classes.Devices import DeviceMaker
 from Build_Interface import Monitoring_Interface
 from diagServer.diagServer import diagServer
+from Config.Config_RW import readConfig
 
 
 class Laser_Data(Monitoring_Interface):
@@ -29,29 +30,12 @@ class Laser_Data(Monitoring_Interface):
         print(f'Tango version: {tango.__version__}')
 
     def load_config(self):  # To load from JSON
-        spectrometer = dict({('name', 'Spectrometer 1'),
-                             ('address', "SY-SPECTRO_1/Spectrometer/FE1"),
-                             ('type', 'spectrometer')})
-        beam_analyzer = dict({('name', 'Beam Analyzer 1'),
-                             ('address', "FE_CAMERA_1/ImgBeamAnalyzer/1"),
-                             ('type', 'beam analyzer')})
-        energy_meter = dict({('name', 'Energy Meter 1'),
-                             ('address', "FE_EM_1/Energymeter/1"),
-                             ('type', 'energy meter')})
-        dummy_device = dict({('name', 'Dummy device 1'),
-                             ('address', ""),
-                             ('type', 'dummy device')})
-        dummy_device_2 = dict({('name', 'Dummy device 2'),
-                             ('address', ""),
-                             ('type', 'dummy device 1D')})
-        dummy_device_3 = dict({('name', 'Dummy device 3'),
-                        ('address', ""),
-                        ('type', 'dummy device 2D')})
-        dummy_device_4 = dict({('name', 'Dummy device 4'),
-                        ('address', ""),
-                        ('type', 'dummy device 2D')})
+        config_file_path = "./Config/dummy_config.json"
+        
+        # Read configuration back from file
+        loaded_config = readConfig(config_file_path)
+        self.device_list = [loaded_config[key] for key in loaded_config]
 
-        self.device_list = [dummy_device, dummy_device_2, dummy_device_3, dummy_device_4]
 
     def create_devices(self):
         for dev in self.device_list:
