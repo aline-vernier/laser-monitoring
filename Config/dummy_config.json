@@ -1,0 +1,22 @@
+{
+    "device_1": {
+        "name": "Dummy device 1",
+        "address": "",
+        "type": "dummy device"
+    },
+    "device_2": {
+        "name": "Dummy device 2",
+        "address": "",
+        "type": "dummy device 1D"
+    },
+    "device_3": {
+        "name": "Dummy device 3",
+        "address": "",
+        "type": "dummy device 2D"
+    },
+    "device_4": {
+        "name": "Dummy device 4",
+        "address": "",
+        "type": "dummy device 2D"
+    }
+}
