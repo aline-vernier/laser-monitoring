@@ -12,6 +12,7 @@ from abc import abstractmethod
 
 class Graph(QWidget):
     def __init__(self, device: Device):
+        super().__init__()
 
         self.graph = pg.GraphicsLayoutWidget()
         self.plot = self.graph.addPlot()
@@ -20,6 +21,8 @@ class Graph(QWidget):
         self.y_label= device.labels.get('y_label', 'Signal')
         self.x_units= device.labels.get('x_units', 's')
         self.y_units= device.labels.get('y_units', 'a.u.')
+
+        self.plot.setTitle(device.name)
 
     @abstractmethod
     def update_graph(self, data: dict):
@@ -41,8 +44,6 @@ class Rolling_Graph(Graph, Dark_StyleSheet):
         y = data.get('y', 0)
         self.x.append(x)
         self.y.append(y)
-        #self.plot.clear()
-        #self.plot.plot(list(self.x), list(self.y), pen=pg.mkPen(color=Colours.muted_blue, width=2))
         self.curve.setData(list(self.x), list(self.y))
 
 class Static_Graph(Graph, Dark_StyleSheet):
@@ -56,7 +57,6 @@ class Static_Graph(Graph, Dark_StyleSheet):
         self.x = data.get('x', 0)
         self.y = data.get('y', 0)
         #self.plot.clear()
-        #self.plot.plot(list(self.x), list(self.y), pen=pg.mkPen(color=Colours.muted_blue, width=2))
         self.curve.setData(list(self.x), list(self.y))
 
 class Density_Graph(Graph, Dark_StyleSheet):
@@ -65,13 +65,13 @@ class Density_Graph(Graph, Dark_StyleSheet):
         
         self.img_item = pg.ImageItem()
         self.plot.addItem(self.img_item)
-        self.set_dark_mode()
         self.set_labels() # From Dark_StyleSheet
+        self.set_2D_plot_darkstyle()
 
     def update_graph(self, data: dict):
         image = data.get('image', None)
         if image is not None:
-            self.img_item.setImage(image.T)  # Transpose for correct orientation
+            self.img_item.setImage(image)  # Transpose for correct orientation
 
 
 class GraphMaker:
@@ -100,7 +100,7 @@ if __name__ == "__main__":
     app = pg.mkQApp()
     device_def = dict({('name', 'Dummy device 1'),
                              ('address', ""),
-                             ('type', 'dummy device')})
+                             ('type', 'dummy device 2D')})
     device = Devices.DeviceMaker.create(device_def)
     print(device)
     graph = GraphMaker.create(device)

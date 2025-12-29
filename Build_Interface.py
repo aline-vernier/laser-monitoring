@@ -38,7 +38,7 @@ class Monitoring_Interface(QMainWindow):
         self.setWindowTitle('Laser Monitoring')
         self.setWindowIcon(QIcon(self.icon + 'LOA.png'))
         self.setStyleSheet(qdarkstyle.load_stylesheet(qt_api='pyqt6'))
-        self.setGeometry(100, 30, 1200, 500)
+        #self.setGeometry(100, 30, 1200, 500)
 
         self.toolBar = self.addToolBar('tools')
         self.toolBar.setMovable(False)
