@@ -50,6 +50,7 @@ class Static_Graph(Graph, Dark_StyleSheet):
     def __init__(self, device: Device):
         super().__init__(device)
         self.set_dark_mode()
+        self.set_axes() # From Dark_StyleSheet
         self.set_labels() # From Dark_StyleSheet
    
 
@@ -65,7 +66,6 @@ class Density_Graph(Graph, Dark_StyleSheet):
         
         self.img_item = pg.ImageItem()
         self.plot.addItem(self.img_item)
-        self.set_labels() # From Dark_StyleSheet
         self.set_2D_plot_darkstyle()
 
     def update_graph(self, data: dict):
