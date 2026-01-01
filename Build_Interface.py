@@ -31,6 +31,7 @@ class Monitoring_Interface(QMainWindow):
         self.graphs = {}
         self.graph_widgets = {}
 
+
     def setup_interface(self):
         #####################################################################
         #                   Window setup
@@ -71,21 +72,15 @@ class Monitoring_Interface(QMainWindow):
 
         # LHS vertical box with stacked graphs
         self.vbox1 = QVBoxLayout()
+        self.vbox1.setSpacing(0)
+        self.vbox1.setContentsMargins(0, 0, 0, 0)
         self.hbox.addLayout(self.vbox1)
 
         # RHS vertical box with controls and indicators
         self.vbox2 = QVBoxLayout()
-        self.vbox2widget = QWidget()
-        self.vbox2widget.setLayout(self.vbox2)
-        #self.vbox2widget.setFixedWidth(200)
-        self.hbox.addWidget(self.vbox2widget)
-
-        # Title
-        title_label = QLabel('')
-        title_label.setFont(QFont('Arial', 14))
-        title_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.vbox2.addWidget(title_label)
-
+        self.vbox2.setSpacing(0)
+        self.vbox2.setContentsMargins(0, 0, 0, 0)
+        self.hbox.addLayout(self.vbox2)
 
     ############################################
     #                   Graphs
@@ -96,9 +91,15 @@ class Monitoring_Interface(QMainWindow):
         self.graphs[device.name] = graph
         if type(graph) is Graphs.Graph_Maker.Density_Graph:
             self.vbox2.addWidget(graph.graph)
+            self.vbox2.setSpacing(0)
+
         else:
             self.vbox1.addWidget(graph.graph)
-        self.graph_widgets[device.name] = graph.graph   
+            self.vbox1.setSpacing(0)
+        self.graph_widgets[device.name] = graph.graph 
+
+    def add_stretch(self):
+        self.vbox1.addStretch(1)  
 
     def update_graph(self, device: Device, data: dict):
         graph = self.graphs.get(device.name)
