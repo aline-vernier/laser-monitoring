@@ -20,6 +20,7 @@ class Laser_Data(Monitoring_Interface):
         self._buffer_size = buffer_size
         self.device_data = {}
 
+
         self.serv = diagServer(parent=self, data={"state":"starting..."}, name='LaserData') # init the server
         self.serv.start() # start the server thread
 
@@ -47,6 +48,7 @@ class Laser_Data(Monitoring_Interface):
 
                 self.connect_device_signals(device)
                 self.add_graph(device)
+                self.add_stretch()
   
             except Exception as e:
                 print(e)
@@ -55,6 +57,7 @@ class Laser_Data(Monitoring_Interface):
         """Connect device signals to slots"""
         device.worker.data_received.connect(self._on_device_data)
         device.worker.error_occurred.connect(self._on_device_error)
+        #device.worker.signal_shape.connect(self._on_data_size)
 
     def start_all_devices(self):
         """Start monitoring all devices"""
@@ -69,6 +72,7 @@ class Laser_Data(Monitoring_Interface):
     #######################################################################
     #                    SIGNAL HANDLERS (Slots)
     #######################################################################
+
     @pyqtSlot(str, dict)
     def _on_device_data(self, device_id: str, data: dict):
         """Handle data received from any device"""

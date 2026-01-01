@@ -16,6 +16,7 @@ class Data_Acquisition(QObject):
         self.device_id = parent.name
         self.data_type = parent.graph_type
         self.running = False
+        
 
     def start(self):
         """Called when moved to thread"""

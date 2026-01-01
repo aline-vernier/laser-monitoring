@@ -15,6 +15,7 @@ class Graph(QWidget):
         super().__init__()
 
         self.graph = pg.GraphicsLayoutWidget()
+        self.graph.ci.setContentsMargins(5, 5, 5, 5)
         self.plot = self.graph.addPlot()
         
         self.x_label= device.labels.get('x_label', 'Time')
@@ -66,7 +67,20 @@ class Density_Graph(Graph, Dark_StyleSheet):
         
         self.img_item = pg.ImageItem()
         self.plot.addItem(self.img_item)
+        self.plot.setAspectLocked(True, ratio=1.0)      
+
         self.set_2D_plot_darkstyle()
+
+    def resize(self, w_h_tuple: tuple): 
+        width, height = w_h_tuple
+        width = int(width/10)
+        height = int(height/10)
+        self.plot.setAspectLocked(True, ratio=width/height)
+        self.img_item.setRect(0, 0, width, height)
+        for axis in ['left', 'bottom', 'right', 'top']:
+            self.plot.hideAxis(axis)
+          
+
 
     def update_graph(self, data: dict):
         image = data.get('image', None)
