@@ -8,21 +8,26 @@ from Device_Classes.Devices import DeviceMaker
 from Build_Interface import Monitoring_Interface
 from diagServer.diagServer import diagServer
 from Config.Config_RW import readConfig
+from Data_Saver.Data_Saver import DataSaver
 
 
 class Laser_Data(Monitoring_Interface):
     signalLaserDataDict = QtCore.pyqtSignal(object)
-    def __init__(self, polling_period: float, buffer_size: int=1000):
+    def __init__(self, polling_period: float, buffer_size: int=1000, verbose: bool=False):
         super().__init__(buffer_size)
         self.setup()
         self.devices = {}
         self.polling_period = polling_period
         self._buffer_size = buffer_size
         self.device_data = {}
-
+        self.verbose = verbose
 
         self.serv = diagServer(parent=self, data={"state":"starting..."}, name='LaserData') # init the server
         self.serv.start() # start the server thread
+
+        self.data_saver = DataSaver(filename='./Data_Saver/laser_data.h5')
+        self.data_saver.start()
+
 
     def setup(self):
 
@@ -58,6 +63,9 @@ class Laser_Data(Monitoring_Interface):
         device.worker.data_received.connect(self._on_device_data)
         device.worker.error_occurred.connect(self._on_device_error)
         #device.worker.signal_shape.connect(self._on_data_size)
+        self.data_saver.buffer_warning.connect(lambda size: print(f"WARNING: Buffer filling up! Size: {size}"))
+        self.data_saver.data_saved.connect(lambda count: print(f"Saved batch of {count} points"))
+      
 
     def start_all_devices(self):
         """Start monitoring all devices"""
@@ -79,7 +87,14 @@ class Laser_Data(Monitoring_Interface):
         device = self.devices.get(device_id)
         self.update_graph(device, data)
         self.signalLaserDataDict.emit(dict(device_id=device_id, data=data)) # Signal for DiagServ
-        
+
+        if self.devices[device_id].graph_type == 'rolling_1d':
+            self.data_saver.on_data_event(data['x'], device_id, data['y'])
+        elif self.verbose:
+            print(f'Method not implemented for device type: {self.devices[device_id].type}')
+        else:
+            pass
+
     @pyqtSlot(str, str)
     def _on_device_error(self, device_id: str, error: str):
         """Handle errors from any device"""
@@ -90,14 +105,16 @@ class Laser_Data(Monitoring_Interface):
         """Clean up when window closes"""
         self.stop_all_devices()
         self.serv.stop()
+        self.data_saver.stop()
         event.accept()
+
 
 
 if __name__ == "__main__":
 
     appli = QApplication(sys.argv)
     appli.setStyleSheet(qdarkstyle.load_stylesheet(qt_api='pyqt6'))
-    laser_data = Laser_Data(polling_period=1)
+    laser_data = Laser_Data(polling_period=1, verbose=False)
     laser_data.load_config()
     laser_data.create_devices()
     laser_data.start_all_devices()

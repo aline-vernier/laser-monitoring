@@ -10,7 +10,7 @@ from PyQt6.QtCore import pyqtSlot, QObject, pyqtSignal
 class DataPoint(tables.IsDescription):
     """Define the structure of each data point in the HDF5 table"""
     timestamp = tables.Float64Col()  # Unix timestamp
-    channel = tables.Int16Col()      # Channel/device ID
+    device_id = tables.StringCol(16)     # device ID
     value = tables.Int16Col()        # 16-bit measurement value
 
 
@@ -21,9 +21,8 @@ class DataSaver(QObject):
     buffer_warning = pyqtSignal(int)  # Emitted when buffer fills up
     data_saved = pyqtSignal(int)      # Emitted after batch write (count)
     
-    def __init__(self, filename, batch_size=1000, max_buffer=10000, flush_interval=1.0):
+    def __init__(self,filename, batch_size=1000, max_buffer=10000, flush_interval=1.0):
         super().__init__()
-        
         self.filename = filename
         self.batch_size = batch_size
         self.max_buffer = max_buffer
@@ -101,9 +100,9 @@ class DataSaver(QObject):
         Fast event handler - just adds data to buffer
         
         Can be called as:
-        - on_data_event(timestamp, channel, value)
-        - on_data_event((timestamp, channel, value))
-        - on_data_event({'timestamp': t, 'channel': c, 'value': v})
+        - on_data_event(timestamp, device_id, value)
+        - on_data_event((timestamp, device_id, value))
+        - on_data_event({'timestamp': t, 'device_id': c, 'value': v})
         """
         if not self.running:
             return
@@ -112,8 +111,7 @@ class DataSaver(QObject):
         if len(args) == 1:
             data = args[0]
             if isinstance(data, dict):
-                data_point = (data['timestamp'], data['channel'], data['value'])
-                
+                data_point = (data['timestamp'], data['device_id'], data['value'])              
             else:
                 data_point = data
         else:
@@ -171,9 +169,9 @@ class DataSaver(QObject):
             
         # Convert batch to numpy structured array for efficient writing
         row = self.table.row
-        for timestamp, channel, value in batch:
+        for timestamp, device_id, value in batch:
             row['timestamp'] = timestamp
-            row['channel'] = channel
+            row['device_id'] = device_id
             row['value'] = value
             row.append()
             
@@ -213,7 +211,7 @@ if __name__ == '__main__':
     app = QCoreApplication(sys.argv)
     
     # Create data saver
-    saver = DataSaver('./Data_Saver/test_acquisition.h5', batch_size=3, flush_interval=0.5)
+    saver = DataSaver(filename='./Data_Saver/test_acquisition.h5', batch_size=3, flush_interval=0.5)
     
     # Connect monitoring signals
     saver.buffer_warning.connect(lambda size: print(f"WARNING: Buffer filling up! Size: {size}"))
@@ -221,20 +219,23 @@ if __name__ == '__main__':
     
     saver.start()
     
+    def send_data_for_saving(data):
+        pass
+
     # Simulate 100 Hz data acquisition
     call_count = [0]
     def simulate_data():
         call_count[0] += 1
         timestamp = time.time()
-        channel = random.randint(0, 10)
+        device_id = random.choice(['dev1','dev2','dev3'])
         value = random.randint(-32768, 32767)
-        saver.on_data_event(timestamp, channel, value)
+        saver.on_data_event(timestamp, device_id, value)
         if call_count[0] % 100 == 0:
             print(f"Generated {call_count[0]} data points")
     
     timer = QTimer()
     timer.timeout.connect(simulate_data)
-    timer.start(3)  # ~300 Hz (every 3ms)
+    timer.start(10)  # 100 Hz (every 10ms)
     
     # Stop after 5 seconds
     QTimer.singleShot(5000, lambda: [timer.stop(), saver.stop(), app.quit()])
