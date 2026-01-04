@@ -25,7 +25,7 @@ class Monitoring_Interface(QMainWindow):
     def __init__(self, buffer_size: int=1000):
         super().__init__()
         p = pathlib.Path(__file__)
-        self.icon = str(p.parent) + sepa + 'icons' + sepa
+        self.icon = str(p.parent / 'icons')
         print(f'Icon path: {self.icon + "LOA.png"}')
         self.setup_interface()
         self.graphs = {}

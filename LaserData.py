@@ -62,7 +62,6 @@ class Laser_Data(Monitoring_Interface):
         """Connect device signals to slots"""
         device.worker.data_received.connect(self._on_device_data)
         device.worker.error_occurred.connect(self._on_device_error)
-        #device.worker.signal_shape.connect(self._on_data_size)
         self.data_saver.buffer_warning.connect(lambda size: print(f"WARNING: Buffer filling up! Size: {size}"))
         self.data_saver.data_saved.connect(lambda count: print(f"Saved batch of {count} points"))
       

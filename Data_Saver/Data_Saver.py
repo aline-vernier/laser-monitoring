@@ -11,7 +11,19 @@ class DataPoint(tables.IsDescription):
     """Define the structure of each data point in the HDF5 table"""
     timestamp = tables.Float64Col()  # Unix timestamp
     device_id = tables.StringCol(16)     # device ID
-    value = tables.Int16Col()        # 16-bit measurement value
+    value = tables.Int16Col(shape=())        # 16-bit measurement value
+
+class DataWaveform(tables.IsDescription):
+    """Define the structure of waveform data points in the HDF5 table"""
+    timestamp = tables.Float64Col()  # Unix timestamp
+    device_id = tables.StringCol(16)     # device ID
+    waveform = tables.Int16Col(shape=(1024,))  # 1024-sample waveform
+
+class DataImage(tables.IsDescription):
+    """Define the structure of image data points in the HDF5 table"""
+    timestamp = tables.Float64Col()  # Unix timestamp
+    device_id = tables.StringCol(16)     # device ID
+    image = tables.UInt8Col(shape=(480, 640))  # 640x480 grayscale image
 
 
 class DataSaver(QObject):
@@ -202,7 +214,6 @@ class DataSaver(QObject):
         }
 
 
-# Example usage
 if __name__ == '__main__':
     from PyQt6.QtCore import QTimer, QCoreApplication
     import sys
@@ -210,7 +221,7 @@ if __name__ == '__main__':
     
     app = QCoreApplication(sys.argv)
     
-    # Create data saver
+
     saver = DataSaver(filename='./Data_Saver/test_acquisition.h5', batch_size=3, flush_interval=0.5)
     
     # Connect monitoring signals

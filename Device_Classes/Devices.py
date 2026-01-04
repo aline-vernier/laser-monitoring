@@ -16,8 +16,8 @@ class Device(QObject):
         self.name = definition['name']
         self.address = definition['address']
         self.type = definition['type']
-        # Create thread
         self.thread = QThread()
+
 
     def setup(self):
         try:
@@ -26,6 +26,15 @@ class Device(QObject):
             self.device_proxy = None
             raise Exception(f"Could not connect to device: {self.name}")
         
+    @property
+    def shape(self):
+        if self.worker is None:
+            print("Worker not defined.")
+            return None
+        else:
+            return self.worker.get_shape()
+    
+
     @abstractmethod
     def get_data(self):
         if self.device_proxy:
@@ -40,7 +49,6 @@ class Device(QObject):
     def stop_device(self):
         """Stop the device thread"""
         self.worker.running = False
-        #time.sleep(1)
         self.thread.quit()
 
 
@@ -56,6 +64,8 @@ class DummyDevice(Device):
         # Connect thread started signal to worker start method
         self.thread.started.connect(self.worker.start)
 
+
+
 class DummyDevice1D(Device):
     def __init__(self, definition: dict):
         super().__init__(definition)
@@ -67,6 +77,8 @@ class DummyDevice1D(Device):
         self.worker.moveToThread(self.thread)
         # Connect thread started signal to worker start method
         self.thread.started.connect(self.worker.start)
+
+
 
 class DummyDevice2D(Device):
     def __init__(self, definition: dict):
