@@ -34,6 +34,9 @@ class VirtualDevice(Data_Acquisition):
 
     def setup(self):
         pass
+
+    def get_shape(self):
+        return self._generate_data()['shape']
         
     def _generate_data(self):
         if not self.running:
@@ -62,16 +65,19 @@ class VirtualDevice(Data_Acquisition):
     def point_data(self):
         return {
             'x': datetime.now().timestamp() - self._t0,
-            'y': random.uniform(0, 100)
+            'y': random.uniform(0, 100),
+            'shape':()
         }   
 
     def waveform_data(self):
         return {
             'x': [i for i in range(100)],
-            'y': [random.uniform(0, 100) for _ in range(100)]
+            'y': [random.uniform(0, 100) for _ in range(100)],
+            'shape': (100,)
         }
     def image_data(self):
         data = np.random.randint(0, 255, (2048, 1088))
         return {
-            'image': data
+            'image': data,
+            'shape': data.shape
         }
