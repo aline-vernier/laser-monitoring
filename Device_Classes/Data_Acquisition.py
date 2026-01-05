@@ -2,7 +2,6 @@ from PyQt6.QtCore import pyqtSignal, QObject, QTimer
 from datetime import datetime
 import random
 import numpy as np
-from abc import abstractmethod
 
 class Data_Acquisition(QObject):
     """Base class that runs in a separate thread"""
@@ -12,15 +11,26 @@ class Data_Acquisition(QObject):
 
     def __init__(self, parent=None):
         super().__init__()
-        self.device_id = parent.name
-        self.data_type = parent.graph_type
-        self.running = False
+        if parent:
+            self.device_id = parent.name
+            self.data_type = parent.graph_type
+            self.running = False
+        else:
+            self.device_id = "Virtual Device"
+            self.data_type = "rolling_1d"
+            self.running = False
+        self._t0 = None
 
-    @abstractmethod
-    def get_shape(self):
+
+    def shape(self):
         """Return the shape of the data produced by this device"""
-        pass
-        
+        self.start()
+        data = self.data_generator()
+        print(f'data: {data}')
+        shape = data['shape']
+        self.stop()
+        return shape
+          
 
     def start(self):
         """Called when moved to thread"""
@@ -36,20 +46,13 @@ class VirtualDevice(Data_Acquisition):
 
     def __init__(self, parent=None):
         super().__init__(parent)
+        
 
     def setup(self):
         pass
 
-    def get_shape(self):
-        self.running = True
-        shape = self.data_generator()['shape']
-        self.running = False
-        return shape
         
     def _generate_data(self):
-        if not self.running:
-            self.finished.emit()
-            return
         
         data = self.data_generator()
         self.data_received.emit(self.device_id, data)
@@ -73,7 +76,7 @@ class VirtualDevice(Data_Acquisition):
         return {
             'x': datetime.now().timestamp() - self._t0,
             'y': random.uniform(0, 100),
-            'shape':()
+            'shape':(1)
         }   
 
     def waveform_data(self):
@@ -88,3 +91,17 @@ class VirtualDevice(Data_Acquisition):
             'image': data,
             'shape': data.shape
         }
+    
+if __name__ == "__main__":
+    from PyQt6.QtWidgets import QApplication
+    import sys
+
+    app = QApplication(sys.argv)
+
+    virtual_device = VirtualDevice()
+    virtual_device.data_received.connect(lambda device_id, data: print(f"Data from {device_id}: {data}"))
+    virtual_device.start()
+    print(f"Data shape: {virtual_device.shape()}")
+    virtual_device.stop()
+
+    sys.exit(app.exec())
