@@ -29,6 +29,10 @@ class Device(QObject):
         except Exception:
             self.device_proxy = None
             raise Exception(f"Could not connect to device: {self.name}")
+        
+    @property
+    def shape(self):
+        return self.worker.data_shapes[self.graph_type]
          
 
     @abstractmethod
@@ -36,7 +40,7 @@ class Device(QObject):
         if self.device_proxy:
             for key in self.values:
                 self.values[key]=self.device_proxy.read_attribute(key).value
-          
+         
 
     def start_device(self):
         """Start the device thread"""
@@ -122,3 +126,14 @@ class DeviceMaker:
             raise ValueError(f"Unknown device type: {device_type}")
 
         return device_class(definition)
+    
+if __name__ == "__main__":
+    # Example usage
+    dummy_def = {
+        'name': 'Dummy1',
+        'address': 'tango://localhost:10000/dummy/1',
+        'type': 'dummy device 2D'
+    }
+    dummy_device = DeviceMaker.create(dummy_def)
+    print(f"Created device: {dummy_device.name} of type {dummy_device.type}")
+    print(f"Device shape: {dummy_device.shape}")

@@ -15,12 +15,14 @@ class DataPoint(tables.IsDescription):
 
 class DataWaveform(tables.IsDescription):
     """Define the structure of waveform data points in the HDF5 table"""
+
     timestamp = tables.Float64Col()  # Unix timestamp
     device_id = tables.StringCol(16)     # device ID
     waveform = tables.Int16Col(shape=(1024,))  # 1024-sample waveform
 
 class DataImage(tables.IsDescription):
     """Define the structure of image data points in the HDF5 table"""
+
     timestamp = tables.Float64Col()  # Unix timestamp
     device_id = tables.StringCol(16)     # device ID
     image = tables.UInt8Col(shape=(480, 640))  # 640x480 grayscale image

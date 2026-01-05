@@ -66,7 +66,7 @@ class Density_Graph(Graph, Dark_StyleSheet):
         super().__init__(device)
         
         self.img_item = pg.ImageItem()
-        self.plot.addItem(self.img_item)
+        self.plot.addItem(self.img_item)    
         self.plot.setAspectLocked(True, ratio=1.0)      
 
         self.set_2D_plot_darkstyle()
