@@ -2,8 +2,6 @@ from abc import abstractmethod
 from tango import DeviceProxy
 import Device_Classes.Data_Acquisition as Data_Acquisition
 from PyQt6.QtCore import QObject, QThread
-import time 
-from typing import Optional, Tuple
 
 
 class Device(QObject):
@@ -17,8 +15,13 @@ class Device(QObject):
         self.address = definition['address']
         self.type = definition['type']
         self.thread = QThread()
-        self.worker: Optional[Data_Acquisition.VirtualDevice] = None
 
+
+    def start_thread(self):
+        self.worker = Data_Acquisition.VirtualDevice(parent=self)
+        self.worker.moveToThread(self.thread)
+        # Connect thread started signal to worker start method
+        self.thread.started.connect(self.worker.start)
 
     def setup(self):
         try:
@@ -27,11 +30,6 @@ class Device(QObject):
             self.device_proxy = None
             raise Exception(f"Could not connect to device: {self.name}")
          
-  
-    def shape(self) -> Optional[Tuple]:
-        """Returns the data shape if worker exists"""
-        return self.worker.get_shape() if self.worker else None
-    
 
     @abstractmethod
     def get_data(self):
@@ -57,10 +55,7 @@ class DummyDevice(Device):
                        'y_label': 'Signal', 'x_units': 's', 'y_units': 'V'}
         self.graph_type = 'rolling_1d'
 
-        self.worker = Data_Acquisition.VirtualDevice(parent=self)
-        self.worker.moveToThread(self.thread)
-        # Connect thread started signal to worker start method
-        self.thread.started.connect(self.worker.start)
+        self.start_thread()
 
 
 class DummyDevice1D(Device):
@@ -70,10 +65,7 @@ class DummyDevice1D(Device):
                        'y_label': 'Signal', 'x_units': 's', 'y_units': 'V'}
         self.graph_type = 'static_1d'
 
-        self.worker = Data_Acquisition.VirtualDevice(parent=self)
-        self.worker.moveToThread(self.thread)
-        # Connect thread started signal to worker start method
-        self.thread.started.connect(self.worker.start)
+        self.start_thread()
 
 class DummyDevice2D(Device):
     def __init__(self, definition: dict):
@@ -82,10 +74,8 @@ class DummyDevice2D(Device):
                        'y_label': 'y', 'x_units': 'px', 'y_units': 'px'}
         self.graph_type = 'density_2d'
 
-        self.worker = Data_Acquisition.VirtualDevice(parent=self)
-        self.worker.moveToThread(self.thread)
-        # Connect thread started signal to worker start method
-        self.thread.started.connect(self.worker.start)
+        self.start_thread()
+
 
 class Spectrometer(Device):
     def __init__(self, definition: dict):
