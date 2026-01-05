@@ -3,7 +3,7 @@ from tango import DeviceProxy
 import Device_Classes.Data_Acquisition as Data_Acquisition
 from PyQt6.QtCore import QObject, QThread
 import time 
-
+from typing import Optional, Tuple
 
 
 class Device(QObject):
@@ -12,11 +12,12 @@ class Device(QObject):
     """
 
     def __init__(self, definition: dict):
-
+        super().__init__()
         self.name = definition['name']
         self.address = definition['address']
         self.type = definition['type']
         self.thread = QThread()
+        self.worker: Optional[Data_Acquisition.VirtualDevice] = None
 
 
     def setup(self):
@@ -25,14 +26,11 @@ class Device(QObject):
         except Exception:
             self.device_proxy = None
             raise Exception(f"Could not connect to device: {self.name}")
-        
-    @property
-    def shape(self):
-        if self.worker is None:
-            print("Worker not defined.")
-            return None
-        else:
-            return self.worker.get_shape()
+         
+  
+    def shape(self) -> Optional[Tuple]:
+        """Returns the data shape if worker exists"""
+        return self.worker.get_shape() if self.worker else None
     
 
     @abstractmethod
@@ -65,7 +63,6 @@ class DummyDevice(Device):
         self.thread.started.connect(self.worker.start)
 
 
-
 class DummyDevice1D(Device):
     def __init__(self, definition: dict):
         super().__init__(definition)
@@ -77,8 +74,6 @@ class DummyDevice1D(Device):
         self.worker.moveToThread(self.thread)
         # Connect thread started signal to worker start method
         self.thread.started.connect(self.worker.start)
-
-
 
 class DummyDevice2D(Device):
     def __init__(self, definition: dict):
@@ -92,14 +87,11 @@ class DummyDevice2D(Device):
         # Connect thread started signal to worker start method
         self.thread.started.connect(self.worker.start)
 
-
-
 class Spectrometer(Device):
     def __init__(self, definition: dict):
         super().__init__(definition)
         self.setup()
         self.values=dict({("lambda", []), ("intensity", [])})
-    
 
 
 class BeamAnalyzer(Device):
@@ -114,11 +106,10 @@ class BeamAnalyzer(Device):
 
 
 class EnergyMeter(Device):
-    def __init__(self, definition: dict, is_virtual):
+    def __init__(self, definition: dict):
         super().__init__(definition)
         self.setup()
         self.values=dict({("energy_1", [])})
-
 
 
 class DeviceMaker:

@@ -50,7 +50,7 @@ class Laser_Data(Monitoring_Interface):
                 device_id = dev['name']
                 device = DeviceMaker.create(dev)
                 self.devices[device_id] = device
-
+                
                 self.connect_device_signals(device)
                 self.add_graph(device)
                 self.add_stretch()
