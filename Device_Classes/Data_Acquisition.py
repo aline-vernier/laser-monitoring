@@ -2,8 +2,7 @@ from PyQt6.QtCore import pyqtSignal, QObject, QTimer
 from datetime import datetime
 import random
 import numpy as np
-
-
+from abc import abstractmethod
 
 class Data_Acquisition(QObject):
     """Base class that runs in a separate thread"""
@@ -16,6 +15,11 @@ class Data_Acquisition(QObject):
         self.device_id = parent.name
         self.data_type = parent.graph_type
         self.running = False
+
+    @abstractmethod
+    def get_shape(self):
+        """Return the shape of the data produced by this device"""
+        pass
         
 
     def start(self):
@@ -23,12 +27,13 @@ class Data_Acquisition(QObject):
         self.running = True
         self.period_ms = 100  # Set default period if not set
         self._t0 = datetime.now().timestamp()
-        self._generate_data()  # Start the cycle
+        self._generate_data()  # Start the cycle 
     
     def stop(self):
         self.running = False
 
 class VirtualDevice(Data_Acquisition):
+
     def __init__(self, parent=None):
         super().__init__(parent)
 
@@ -36,7 +41,10 @@ class VirtualDevice(Data_Acquisition):
         pass
 
     def get_shape(self):
-        return self._generate_data()['shape']
+        self.running = True
+        shape = self.data_generator()['shape']
+        self.running = False
+        return shape
         
     def _generate_data(self):
         if not self.running:
@@ -48,7 +56,6 @@ class VirtualDevice(Data_Acquisition):
         
         # Schedule next call
         QTimer.singleShot(self.period_ms, self._generate_data)
-
 
     def data_generator(self):
         data_generators = {
