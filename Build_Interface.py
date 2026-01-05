@@ -109,15 +109,6 @@ class Monitoring_Interface(QMainWindow):
             print(f"Warning: No graph found for device '{device.name}'")
 
 
-    def get_graph(self, device_name: str):
-        """Retrieve a specific graph by device name"""
-        pass
-
-    def remove_graph(self, device_name: str):
-        """Remove a graph and its widget"""
-        pass
-
-
 if __name__ == "__main__":
 
     appli = QApplication(sys.argv)   
