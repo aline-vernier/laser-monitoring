@@ -1,5 +1,4 @@
 import tables
-import numpy as np
 from queue import Queue, Full
 import threading
 import time
@@ -26,7 +25,6 @@ class DataImage(tables.IsDescription):
     timestamp = tables.Float64Col()  # Unix timestamp
     device_id = tables.StringCol(16)     # device ID
     image = tables.UInt8Col(shape=(480, 640))  # 640x480 grayscale image
-
 
 class DataSaver(QObject):
     """Thread-safe data saver for high-frequency acquisition"""
