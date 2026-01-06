@@ -1,0 +1,8 @@
+pyqtgraph~=0.13.7
+pyqt6~=6.5.1
+setuptools~=68.2.2
+pyzmq~=27.1.0
+pytango~=9.5.1
+qdarkstyle~=3.2.3
+tables~=3.10.2
+numpy~=1.26.4
