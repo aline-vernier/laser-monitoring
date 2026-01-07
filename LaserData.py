@@ -8,8 +8,7 @@ from Device_Classes.Devices import DeviceMaker
 from Build_Interface import Monitoring_Interface
 from diagServer.diagServer import diagServer
 from Config.Config_RW import readConfig
-from Data_Saver.Data_Saver import DataSaver
-
+from Data_Saver.Data_Saver_old import DataSaver
 
 class Laser_Data(Monitoring_Interface):
     signalLaserDataDict = QtCore.pyqtSignal(object)
@@ -27,6 +26,7 @@ class Laser_Data(Monitoring_Interface):
 
         self.data_saver = DataSaver(filename='./Data_Saver/laser_data.h5')
         self.data_saver.start()
+       
 
 
     def setup(self):
@@ -57,6 +57,10 @@ class Laser_Data(Monitoring_Interface):
   
             except Exception as e:
                 print(e)
+
+    def configure_h5File(self):
+         #self.data_saver.start(self.devices)
+         pass
 
     def connect_device_signals(self, device):
         """Connect device signals to slots"""
@@ -116,6 +120,7 @@ if __name__ == "__main__":
     laser_data = Laser_Data(polling_period=1, verbose=False)
     laser_data.load_config()
     laser_data.create_devices()
+    laser_data.configure_h5File()
     laser_data.start_all_devices()
     laser_data.show()
     appli.exec_()
