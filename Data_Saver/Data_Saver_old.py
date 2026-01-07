@@ -1,4 +1,5 @@
 import tables
+import h5_Builder
 from queue import Queue, Full
 import threading
 import time
@@ -128,8 +129,7 @@ class DataSaver(QObject):
                 data_point = data
         else:
             data_point = args
-
-            
+       
         # Try to add to buffer (non-blocking)
         try:
             self.buffer.put_nowait(data_point)

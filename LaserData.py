@@ -8,7 +8,7 @@ from Device_Classes.Devices import DeviceMaker
 from Build_Interface import Monitoring_Interface
 from diagServer.diagServer import diagServer
 from Config.Config_RW import readConfig
-from Data_Saver.Data_Saver_old import DataSaver
+from Data_Saver.Data_Saver import DataSaver
 
 class Laser_Data(Monitoring_Interface):
     signalLaserDataDict = QtCore.pyqtSignal(object)
@@ -25,10 +25,7 @@ class Laser_Data(Monitoring_Interface):
         self.serv.start() # start the server thread
 
         self.data_saver = DataSaver(filename='./Data_Saver/laser_data.h5')
-        self.data_saver.start()
        
-
-
     def setup(self):
 
         tango_host = tango.ApiUtil.get_env_var("TANGO_HOST")
@@ -59,8 +56,8 @@ class Laser_Data(Monitoring_Interface):
                 print(e)
 
     def configure_h5File(self):
-         #self.data_saver.start(self.devices)
-         pass
+         self.data_saver.start(self.devices)
+         
 
     def connect_device_signals(self, device):
         """Connect device signals to slots"""
