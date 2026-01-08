@@ -1,22 +1,33 @@
 {
     "device_1": {
-        "name": "Dummy_device_1",
+        "name": "Energy meter 1",
         "address": "",
         "type": "dummy device"
     },
     "device_2": {
-        "name": "Dummy_device_2",
+        "name": "Energy meter 2",
         "address": "",
         "type": "dummy device"
     },
     "device_3": {
-        "name": "Dummy_device_3",
+        "name": "Spectrometer 1",
         "address": "",
         "type": "dummy device 1D"
     },
     "device_4": {
-        "name": "Dummy_device_4",
+        "name": "Far-field",
         "address": "",
         "type": "dummy device 2D"
+    },
+    "device_5":{
+        "name": "Centroid 1",
+        "address": "",
+        "type":"dummy device"
+    },
+    "device_6": {
+        "name": "Spectrometer 2",
+        "address": "",
+        "type": "dummy device 1D"
     }
+
 }

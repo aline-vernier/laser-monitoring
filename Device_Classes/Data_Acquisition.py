@@ -2,6 +2,7 @@ from PyQt6.QtCore import pyqtSignal, QObject, QTimer
 from datetime import datetime
 import random
 import numpy as np
+from PIL import Image
 
 class Data_Acquisition(QObject):
     """Base class that runs in a separate thread"""
@@ -23,8 +24,9 @@ class Data_Acquisition(QObject):
         self.data_shapes = {
             'rolling_1d': (1,),
             'static_1d': (100,),
-            'density_2d': (2048, 1088)
+            'density_2d': (808, 608)
         }
+        self.im = np.array(Image.open('./Device_Classes/SampleImages/FOCAL_SPOT.TIFF')).T
 
     def shape(self):
         """Return the shape of the data produced by this device"""
@@ -39,7 +41,7 @@ class Data_Acquisition(QObject):
     def start(self):
         """Called when moved to thread"""
         self.running = True
-        self.period_ms = 100  # Set default period if not set
+        self.period_ms = 1000  # Set default period if not set
         self._t0 = datetime.now().timestamp()
         self._generate_data()  # Start the cycle 
     
@@ -90,7 +92,7 @@ class VirtualDevice(Data_Acquisition):
         }
     def image_data(self):
         data_shape = self.data_shapes['density_2d']
-        data = np.random.randint(0, 255, data_shape)
+        data = self.im + np.random.randint(0, 20, data_shape)
         return {
             'image': data,
         }

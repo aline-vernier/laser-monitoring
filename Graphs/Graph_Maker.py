@@ -1,5 +1,5 @@
 
-import Graphs.Colours as Colours
+
 from Graphs.Graph_StyleSheet import Dark_StyleSheet
 from Device_Classes.Devices import Device
 import Device_Classes.Devices as Devices
@@ -80,8 +80,6 @@ class Density_Graph(Graph, Dark_StyleSheet):
         for axis in ['left', 'bottom', 'right', 'top']:
             self.plot.hideAxis(axis)
           
-
-
     def update_graph(self, data: dict):
         image = data.get('image', None)
         if image is not None:

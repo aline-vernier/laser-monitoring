@@ -15,7 +15,7 @@ class Dark_StyleSheet():
         self.plot.showGrid(x=True, y=True, alpha=0.2)
         self.graph.setBackground(anthracite) 
         #self.plot.setContentsMargins(10, 10, 10, 10)
-        
+        random.seed(random.uniform(1, 3000))
         pen_colour = random.choice(curve_colours)
         self.pen = pg.mkPen(color=pen_colour, width=2)
         self.curve = self.plot.plot(pen=self.pen)    
