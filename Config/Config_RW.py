@@ -45,6 +45,11 @@ if __name__ == "__main__":
             "name": "Dummy device 4",
             "address": "",
             "type": "dummy device 2D"   
+        }, 
+        "device_5": {
+            "name": "Dummy device 4",
+            "address": "",
+            "type": "dummy device 2D"   
         }
     }    
     config_file_path = "./Config/dummy_config.json"

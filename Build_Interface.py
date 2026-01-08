@@ -8,7 +8,8 @@ Build Spectrometer Interface - GUI only
 from PyQt6.QtWidgets import QApplication, QVBoxLayout, QWidget, QHBoxLayout, QGridLayout
 from PyQt6.QtWidgets import (QLabel, QMainWindow, QStatusBar, QComboBox,
                              QCheckBox, QDoubleSpinBox,  QPushButton, QLineEdit)
-from PyQt6.QtGui import QIcon, QFont
+import PyQt6.QtGui as QtGui
+from PyQt6.QtGui import QIcon, QFont, QAction
 from PyQt6.QtCore import Qt
 import sys
 import qdarkstyle
@@ -18,6 +19,8 @@ import Graphs.Graph_Maker
 from Graphs.Graph_Maker import GraphUpdater
 from Device_Classes.Devices import Device 
 
+from SubMenus.WinOption import OPTION
+
 sepa = os.sep
 
 
@@ -26,18 +29,19 @@ class Monitoring_Interface(QMainWindow):
         super().__init__()
         p = pathlib.Path(__file__)
         self.icon = str(p.parent / 'icons')
-        print(f'Icon path: {self.icon + "LOA.png"}')
+        print(f'Icon path: {self.icon + "/LOA.png"}')
+        self.name = "VISU"
         self.setup_interface()
         self.graphs = {}
         self.graph_widgets = {}
-
+        
 
     def setup_interface(self):
         #####################################################################
         #                   Window setup
         #####################################################################
         self.setWindowTitle('Laser Monitoring')
-        self.setWindowIcon(QIcon(self.icon + 'LOA.png'))
+        self.setWindowIcon(QIcon(self.icon + "/LOA.png"))
         self.setStyleSheet(qdarkstyle.load_stylesheet(qt_api='pyqt6'))
         #self.setGeometry(100, 30, 1200, 500)
 
@@ -47,6 +51,25 @@ class Monitoring_Interface(QMainWindow):
         self.setStatusBar(self.statusBar)
 
         self.fileMenu = self.menuBar().addMenu('&File')
+        self.winOpt = OPTION(conf=None, name=self.name, parent=self)
+        self.optionAutoSaveAct = QAction(QtGui.QIcon(self.icon+"Settings.png"),
+                                         'Options', self)
+
+        
+        self.toolBar.addAction(self.optionAutoSaveAct)
+        self.fileMenu.addAction(self.optionAutoSaveAct)
+        self.optionAutoSaveAct.triggered.connect(
+            lambda: self.open_widget(self.winOpt))
+        
+    def open_widget(self, win):
+        """ open new widget
+        """
+        if win.isWinOpen is False:
+            win.setup
+            win.isWinOpen = True
+            win.show()
+        else:
+            win.showNormal()
 
         #####################################################################
         #                   Global layout and geometry
@@ -89,13 +112,13 @@ class Monitoring_Interface(QMainWindow):
     def add_graph(self, device: Device):
         graph = Graphs.Graph_Maker.GraphMaker.create(device)    
         self.graphs[device.name] = graph
-        if type(graph) is Graphs.Graph_Maker.Density_Graph:
-            self.vbox2.addWidget(graph.graph)
-            self.vbox2.setSpacing(0)
-
-        else:
+        if type(graph) is Graphs.Graph_Maker.Rolling_Graph:
             self.vbox1.addWidget(graph.graph)
             self.vbox1.setSpacing(0)
+
+        else:
+            self.vbox2.addWidget(graph.graph)
+            self.vbox2.setSpacing(0)
         self.graph_widgets[device.name] = graph.graph 
 
     def add_stretch(self):
