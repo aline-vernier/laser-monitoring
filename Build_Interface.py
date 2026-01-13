@@ -61,15 +61,7 @@ class Monitoring_Interface(QMainWindow):
         self.optionAutoSaveAct.triggered.connect(
             lambda: self.open_widget(self.winOpt))
         
-    def open_widget(self, win):
-        """ open new widget
-        """
-        if win.isWinOpen is False:
-            win.setup
-            win.isWinOpen = True
-            win.show()
-        else:
-            win.showNormal()
+
 
         #####################################################################
         #                   Global layout and geometry
@@ -104,6 +96,16 @@ class Monitoring_Interface(QMainWindow):
         self.vbox2.setSpacing(0)
         self.vbox2.setContentsMargins(0, 0, 0, 0)
         self.hbox.addLayout(self.vbox2)
+
+    def open_widget(self, win):
+        """ open new widget
+        """
+        if win.isWinOpen is False:
+            win.setup
+            win.isWinOpen = True
+            win.show()
+        else:
+            win.showNormal()
 
     ############################################
     #                   Graphs

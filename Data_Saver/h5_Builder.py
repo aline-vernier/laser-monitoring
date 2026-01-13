@@ -17,11 +17,16 @@ class H5Builder:
                 if device.graph_type == 'rolling_1d':
                     dataset_name = f'devices/{device_id}'
                     print(f'Dataset Name {dataset_name}')
-                    
+
+                    _format = {"name":dataset_name, "shape": (0,2), 
+                               "maxshape": (None, 2), "dtype":'f8', 
+                               "chunks":(1000, 2), "compression":'gzip', 
+                               "compression_opts":4}
+                     
                     if dataset_name not in f:
                         # Create dataset with 2 columns: timestamp and value
                         f.create_dataset(
-                            dataset_name,
+                            _format["name"],
                             shape=(0, 2),           # Start with 0 rows, 2 columns
                             maxshape=(None, 2),     # Unlimited rows
                             dtype='f8',             # float64 for both timestamp and value
@@ -91,3 +96,18 @@ class H5Builder:
             if 'devices' in f:
                 return list(f['devices'].keys())
             return []
+
+class PointDataset:
+    def __init__ (self, device: Any):
+        pass
+
+        
+    
+
+
+class WaveformDataset:
+    pass
+class imageDataset:
+    pass
+class BODataset:
+    pass
