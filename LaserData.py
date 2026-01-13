@@ -41,6 +41,7 @@ class Laser_Data(Monitoring_Interface):
  
 
     def create_devices(self):
+        print('Creating devices')
         for dev in self.device_list:
             try:
                 # Dictionary of device objects
