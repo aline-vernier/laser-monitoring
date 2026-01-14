@@ -4,6 +4,7 @@ import pathlib
 from typing import Dict, Any
 from threading import Lock
 
+
 class H5Builder:
     def __init__(self, file: pathlib.Path):
         self.file = file
@@ -18,10 +19,10 @@ class H5Builder:
                     dataset_name = f'devices/{device_id}'
                     print(f'Dataset Name {dataset_name}')
 
-                    _format = {"name":dataset_name, "shape": (0,2), 
+                    _format = {"name": dataset_name, "shape": (0,2),
                                "maxshape": (None, 2), "dtype":'f8', 
-                               "chunks":(1000, 2), "compression":'gzip', 
-                               "compression_opts":4}
+                               "chunks": (1000, 2), "compression":'gzip',
+                               "compression_opts": 4}
                      
                     if dataset_name not in f:
                         # Create dataset with 2 columns: timestamp and value

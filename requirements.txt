@@ -6,3 +6,4 @@ pytango~=9.5.1
 qdarkstyle~=3.2.3
 tables~=3.10.2
 numpy~=1.26.4
+h5py~=3.12.1
