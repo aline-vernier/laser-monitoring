@@ -41,7 +41,7 @@ class DataSaver(QObject):
             return
             
         # Configure HDF5 file
-        self.h5_file.create_file(devices= devices)
+        self.h5_file.create_file(devices=devices)
 
         
         # Start writer thread

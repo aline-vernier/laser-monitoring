@@ -45,9 +45,9 @@ class Laser_Data(Monitoring_Interface):
         for dev in self.device_list:
             try:
                 # Dictionary of device objects
-                device_id = dev['name']
+                device_name = dev['name']
                 device = DeviceMaker.create(dev)
-                self.devices[device_id] = device
+                self.devices[device_name] = device
                 
                 self.connect_device_signals(device)
                 self.add_graph(device)
@@ -66,7 +66,6 @@ class Laser_Data(Monitoring_Interface):
         device.worker.error_occurred.connect(self._on_device_error)
         self.data_saver.buffer_warning.connect(lambda size: print(f"WARNING: Buffer filling up! Size: {size}"))
         self.data_saver.data_saved.connect(lambda count: print(f"Saved batch of {count} points"))
-      
 
     def start_all_devices(self):
         """Start monitoring all devices"""
@@ -83,16 +82,16 @@ class Laser_Data(Monitoring_Interface):
     #######################################################################
 
     @pyqtSlot(str, dict)
-    def _on_device_data(self, device_id: str, data: dict):
+    def _on_device_data(self, device_name: str, data: dict):
         """Handle data received from any device"""
-        device = self.devices.get(device_id)
+        device = self.devices.get(device_name)
         self.update_graph(device, data)
-        self.signalLaserDataDict.emit(dict(device_id=device_id, data=data)) # Signal for DiagServ
+        self.signalLaserDataDict.emit(dict(device_name=device_name, data=data)) # Signal for DiagServ
 
-        if self.devices[device_id].graph_type == 'rolling_1d':
-            self.data_saver.on_data_event(data['x'], device_id, data['y'])
+        if self.devices[device_name].graph_type == 'rolling_1d':
+            self.data_saver.on_data_event(data['x'], device_name, data['y'])
         elif self.verbose:
-            print(f'Method not implemented for device type: {self.devices[device_id].type}')
+            print(f'Method not implemented for device type: {self.devices[device_name].type}')
         else:
             pass
 
