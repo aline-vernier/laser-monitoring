@@ -18,10 +18,10 @@ class Graph(QWidget):
         self.graph.ci.setContentsMargins(5, 5, 5, 5)
         self.plot = self.graph.addPlot()
         
-        self.x_label= device.labels.get('x_label', 'Time')
-        self.y_label= device.labels.get('y_label', 'Signal')
-        self.x_units= device.labels.get('x_units', 's')
-        self.y_units= device.labels.get('y_units', 'a.u.')
+        self.x_label = device.labels.get('x_label', 'Time')
+        self.y_label = device.labels.get('y_label', 'Signal')
+        self.x_units = device.labels.get('x_units', 's')
+        self.y_units = device.labels.get('y_units', 'a.u.')
 
         self.plot.setTitle(device.name)
 
@@ -30,7 +30,7 @@ class Graph(QWidget):
         pass
 
 
-class Rolling_Graph(Graph, Dark_StyleSheet):
+class RollingGraph(Graph, Dark_StyleSheet):
     def __init__(self, device: Device):
         super().__init__(device)
         
@@ -47,7 +47,7 @@ class Rolling_Graph(Graph, Dark_StyleSheet):
         self.y.append(y)
         self.curve.setData(list(self.x), list(self.y))
 
-class Static_Graph(Graph, Dark_StyleSheet):
+class StaticGraph(Graph, Dark_StyleSheet):
     def __init__(self, device: Device):
         super().__init__(device)
         self.set_dark_mode()
@@ -61,7 +61,7 @@ class Static_Graph(Graph, Dark_StyleSheet):
         #self.plot.clear()
         self.curve.setData(list(self.x), list(self.y))
 
-class Density_Graph(Graph, Dark_StyleSheet):
+class DensityGraph(Graph, Dark_StyleSheet):
     def __init__(self, device: Device):
         super().__init__(device)
         
@@ -88,15 +88,17 @@ class Density_Graph(Graph, Dark_StyleSheet):
 
 class GraphMaker:
     _graph_types = {
-        'rolling_1d': Rolling_Graph,
-        'static_1d': Static_Graph,
-        'density_2d': Density_Graph}
+        'rolling_1d': RollingGraph,
+        'static_1d': StaticGraph,
+        'density_2d': DensityGraph}
 
     @classmethod
     def create(cls, device: Device) -> Graph:
         graph_type = device.graph_type
-        graph_type_class = cls._graph_types.get(graph_type)         
-        if not graph_type_class:
+        graph_type_class = cls._graph_types.get(graph_type)
+        if graph_type is None:
+            pass
+        elif not graph_type_class:
             raise ValueError(f"Unknown graph type: {graph_type}")
         return graph_type_class(device)
     

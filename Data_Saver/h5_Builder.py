@@ -10,7 +10,7 @@ class H5Builder:
         self.file = file
         self.lock = Lock()  # Thread safety for async operations
         
-    def create_file(self, devices: Dict[str, Any]):
+    def create_file(self, devices: dict[str, Any]):
         """Initialize datasets for each device"""
         with h5py.File(self.file, 'a') as f:
             for device_id, device in devices.items():

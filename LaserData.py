@@ -33,7 +33,7 @@ class Laser_Data(Monitoring_Interface):
         print(f'Tango version: {tango.__version__}')
 
     def load_config(self):  # To load from JSON
-        config_file_path = "./Config/dummy_config.json"
+        config_file_path = "./Config/tango_config.json"
         
         # Read configuration back from file
         loaded_config = readConfig(config_file_path)

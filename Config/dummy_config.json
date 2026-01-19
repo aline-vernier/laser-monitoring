@@ -2,32 +2,38 @@
     "device_1": {
         "name": "Energy meter 1",
         "address": "",
-        "type": "dummy device"
+        "type": "dummy device",
+        "is virtual" : true
     },
     "device_2": {
         "name": "Energy meter 2",
         "address": "",
-        "type": "dummy device"
+        "type": "dummy device",
+        "is virtual" : true
     },
     "device_3": {
         "name": "Spectrometer 1",
         "address": "",
-        "type": "dummy device 1D"
+        "type": "dummy device 1D",
+        "is virtual" : true
     },
     "device_4": {
         "name": "Far-field",
         "address": "",
-        "type": "dummy device 2D"
+        "type": "dummy device 2D",
+        "is virtual" : true
     },
     "device_5":{
         "name": "Centroid 1",
         "address": "",
-        "type":"dummy device"
+        "type":"dummy device",
+        "is virtual" : true
     },
     "device_6": {
         "name": "Spectrometer 2",
         "address": "",
-        "type": "dummy device 1D"
+        "type": "dummy device 1D",
+        "is virtual" : true
     }
 
 }

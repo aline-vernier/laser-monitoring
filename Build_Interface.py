@@ -114,7 +114,7 @@ class Monitoring_Interface(QMainWindow):
     def add_graph(self, device: Device):
         graph = Graphs.Graph_Maker.GraphMaker.create(device)    
         self.graphs[device.name] = graph
-        if type(graph) is Graphs.Graph_Maker.Rolling_Graph:
+        if type(graph) is Graphs.Graph_Maker.RollingGraph:
             self.vbox1.addWidget(graph.graph)
             self.vbox1.setSpacing(0)
 

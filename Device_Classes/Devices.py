@@ -6,6 +6,10 @@ from PyQt6.QtCore import QObject, QThread
 from dataclasses import dataclass, field
 from typing import Optional, Dict, Tuple, Any
 
+"""
+To create new device, just specify it in device list, as Virtual Device 
+or Tango Device and add it to the DeviceMaker class
+"""
 
 @dataclass
 class DeviceConfig:
@@ -29,10 +33,17 @@ class Device(QObject):
         self.name = definition['name']
         self.address = definition['address']
         self.type = definition['type']
+        self.isVirtual = definition['is virtual']
+        print(f'Device is virtual: {self.isVirtual is True}')
         self.thread = QThread()
 
-    def start_thread(self):
-        self.worker = Data_Acquisition.VirtualDevice(parent=self)
+
+    def _start_thread(self):
+        if self.isVirtual:
+            self.worker = Data_Acquisition.VirtualDevice(parent=self)
+        else:
+            self.worker = Data_Acquisition.TangoDevice(parent=self)
+
         self.worker.moveToThread(self.thread)
         # Connect thread started signal to worker start method
         self.thread.started.connect(self.worker.start)
@@ -48,15 +59,10 @@ class Device(QObject):
     def shape(self):
         return self.worker.data_shapes[self.graph_type]
 
-    @abstractmethod
-    def get_data(self):
-        if self.device_proxy:
-            for key in self.values:
-                self.values[key] = self.device_proxy.read_attribute(key).value
-
     def start_device(self):
         """Start the device thread"""
         self.thread.start()
+
 
     def stop_device(self):
         """Stop the device thread"""
@@ -71,7 +77,7 @@ class DummyDevice(Device):
                        'y_label': 'Signal', 'x_units': 's', 'y_units': 'V'}
         self.graph_type = 'rolling_1d'
 
-        self.start_thread()
+        self._start_thread()
 
 
 class DummyDevice1D(Device):
@@ -81,7 +87,7 @@ class DummyDevice1D(Device):
                        'y_label': 'Signal', 'x_units': 's', 'y_units': 'V'}
         self.graph_type = 'static_1d'
 
-        self.start_thread()
+        self._start_thread()
 
 
 
@@ -92,13 +98,18 @@ class DummyDevice2D(Device):
                        'y_label': 'y', 'x_units': 'px', 'y_units': 'px'}
         self.graph_type = 'density_2d'
 
-        self.start_thread()
+        self._start_thread()
 
 class Spectrometer(Device):
     def __init__(self, definition: dict):
         super().__init__(definition)
         self.setup()
-        self.values = dict({("lambda", []), ("intensity", [])})
+        self.labels = {'x_label': 'lambda',
+                       'y_label': 'Amplitude', 'x_units': 'nm', 'y_units': 'a.u.'}
+        self.attrs = {'x': 'lambda', 'y': 'intensity'}
+        self.graph_type = 'static_1d'
+
+        self._start_thread()
 
 
 class BeamAnalyzer(Device):
@@ -106,17 +117,19 @@ class BeamAnalyzer(Device):
         super().__init__(definition)
         self.properties = {}
         self.setup()
-        self.values = dict({("Centroid X", []), ("Centroid Y", []),
-                            ('Max Intensity', []), ('Peak X', []),
-                            ('Peak Y', []), ('Variance X', []),
-                            ('Variance Y', [])})
-
+        self.attrs = ('Centroid X', 'Centroid Y', 'Max Intensity',
+                      'Peak X', 'Peak Y', 'Variance X', 'Variance Y')
+        self.graph_type = None
+        self._start_thread()
 
 class EnergyMeter(Device):
     def __init__(self, definition: dict):
         super().__init__(definition)
         self.setup()
-        self.values = dict({("energy_1", [])})
+        self.labels = {'x_label': 'time', 'y_label': 'Energy', 'x-units': '(s)', 'y_units': '(mJ)'}
+        self.attrs = {'x': None, 'y': 'energy_1'}
+        self.graph_type = 'rolling_1d'
+        self._start_thread()
 
 
 class DeviceMaker:
@@ -141,12 +154,31 @@ class DeviceMaker:
 
 
 if __name__ == "__main__":
+    from PyQt6.QtCore import pyqtSlot
+    from PyQt6.QtWidgets import QApplication
+    import sys
+
+    #app = QApplication(sys.argv)
+
+
+    @pyqtSlot(str, dict)
+    def on_device_data(data: dict):
+        for key, item in data:
+            print(f'{key}:{item}')
+
+
     # Example usage
-    dummy_def = {
-        'name': 'Dummy1',
-        'address': 'tango://localhost:10000/dummy/1',
-        'type': 'dummy device 2D'
-    }
-    dummy_device = DeviceMaker.create(dummy_def)
-    print(f"Created device: {dummy_device.name} of type {dummy_device.type}")
-    print(f"Device shape: {dummy_device.shape}")
+    device_def = {
+        "name": "Spectrometer",
+        "address": "SY-SPECTRO_1/Spectrometer/FE1",
+        "type": "spectrometer",
+        "is virtual": False
+        }
+
+    device = DeviceMaker.create(device_def)
+    print(f"Created device: {device.name} of type {device.type}")
+
+    device.start_device()
+    device.worker.data_received.connect(on_device_data)
+
+
