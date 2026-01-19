@@ -16,17 +16,14 @@ class Data_Acquisition(QObject):
             self.device_id = parent.name
             self.data_type = parent.graph_type
             self.running = False
+            self.parent = parent
         else:
             self.device_id = "Virtual Device"
             self.data_type = "rolling_1d"
             self.running = False
         self._t0 = None
-        self.data_shapes = {
-            'rolling_1d': (1,),
-            'static_1d': (100,),
-            'density_2d': (808, 608)
-        }
-        self.im = np.array(Image.open('./Device_Classes/SampleImages/FOCAL_SPOT.TIFF')).T
+
+
 
     def shape(self):
         """Return the shape of the data produced by this device"""
@@ -41,7 +38,7 @@ class Data_Acquisition(QObject):
     def start(self):
         """Called when moved to thread"""
         self.running = True
-        self.period_ms = 1000  # Set default period if not set
+        self.period_ms = 500  # Set default period if not set
         self._t0 = datetime.now().timestamp()
         self._generate_data()  # Start the cycle 
     
@@ -52,12 +49,16 @@ class VirtualDevice(Data_Acquisition):
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        
+        self.data_shapes = {
+            'rolling_1d': (1,),
+            'static_1d': (100,),
+            'density_2d': (808, 608)
+        }
+        self.im = np.array(Image.open('./Device_Classes/SampleImages/FOCAL_SPOT.TIFF')).T
 
     def setup(self):
         pass
 
-        
     def _generate_data(self):
         
         data = self.data_generator()
@@ -90,13 +91,33 @@ class VirtualDevice(Data_Acquisition):
             'x': [i for i in range(data_shape)],
             'y': [random.uniform(0, 100) for _ in range(data_shape)],
         }
+
     def image_data(self):
         data_shape = self.data_shapes['density_2d']
         data = self.im + np.random.randint(0, 20, data_shape)
         return {
             'image': data,
         }
-    
+
+
+class TangoDevice(Data_Acquisition):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+
+    def setup(self):
+        pass
+
+    def _generate_data(self):
+        data = {}
+        for key, attribute in self.parent.attrs.items():
+            data[key] = self.parent.device_proxy.read_attribute(attribute).value
+        self.data_received.emit(self.device_id, data)
+
+
+        # Schedule next call
+        QTimer.singleShot(self.period_ms, self._generate_data)
+
+
 if __name__ == "__main__":
     from PyQt6.QtWidgets import QApplication
     import sys
