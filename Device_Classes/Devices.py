@@ -1,31 +1,28 @@
-from abc import abstractmethod
 from tango import DeviceProxy
 import Device_Classes.Data_Acquisition as Data_Acquisition
 from PyQt6.QtCore import QObject, QThread
-
-from dataclasses import dataclass, field
-from typing import Optional, Dict, Tuple, Any
+from dataclasses import dataclass
+from abc import abstractmethod
 
 """
 To create new device, just specify it in device list, as Virtual Device 
 or Tango Device and add it to the DeviceMaker class
 """
 
+
 @dataclass
-class DeviceConfig:
-    name: str
-    type: str
-    dataset_number: int
+class DatasetSpec:
+    """Specification for a single HDF5 dataset"""
+    shape: tuple[int, ...]
+    dtype: str = 'float64'  # numpy dtype string
 
-    metadata: Optional[Dict] = field(default_factory=dict)
-    shape: Optional[Tuple] = None
-    input_dim: Optional[int] = None
-    output_dim: Optional[int] = None
-
+    def __repr__(self):
+        return f"DatasetSpec(shape={self.shape}, dtype='{self.dtype}')"
 
 class Device(QObject):
     """
     Base class for all devices
+    It allows to format the raw data from devices for saving and displaying
     """
 
     def __init__(self, definition: dict):
@@ -36,6 +33,12 @@ class Device(QObject):
         self.isVirtual = definition['is virtual']
         print(f'Device is virtual: {self.isVirtual is True}')
         self.thread = QThread()
+
+    @property
+    @abstractmethod
+    def hdf5_datasets(self) -> dict[str, DatasetSpec]:
+        pass
+
 
 
     def _start_thread(self):
@@ -55,9 +58,7 @@ class Device(QObject):
             self.device_proxy = None
             raise Exception(f"Could not connect to device: {self.name}")
 
-    @property
-    def shape(self):
-        return self.worker.data_shapes[self.graph_type]
+
 
     def start_device(self):
         """Start the device thread"""
@@ -76,8 +77,15 @@ class DummyDevice(Device):
         self.labels = {'x_label': 'Time',
                        'y_label': 'Signal', 'x_units': 's', 'y_units': 'V'}
         self.graph_type = 'rolling_1d'
-
         self._start_thread()
+
+    @property
+    def hdf5_datasets(self) -> dict[str, DatasetSpec]:
+        return {
+            'timestamp': DatasetSpec(shape=(1,), dtype='float64'),
+            'data': DatasetSpec(shape=(1,), dtype='float64'),
+            'shot_number': DatasetSpec(shape=(1,), dtype='int32')
+        }
 
 
 class DummyDevice1D(Device):
@@ -103,6 +111,7 @@ class DummyDevice2D(Device):
 class Spectrometer(Device):
     def __init__(self, definition: dict):
         super().__init__(definition)
+
         self.setup()
         self.labels = {'x_label': 'lambda',
                        'y_label': 'Amplitude', 'x_units': 'nm', 'y_units': 'a.u.'}

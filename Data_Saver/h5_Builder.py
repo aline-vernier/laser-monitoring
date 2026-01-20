@@ -23,10 +23,10 @@ class H5Builder:
                     if device.graph_type == 'rolling_1d':
                         _format = {
                             "name": dataset_name,
-                            "shape": (0, 2),
-                            "maxshape": (None, 2),
+                            "shape": (0, 1),
+                            "maxshape": (None, 1),
                             "dtype": 'f4',
-                            "chunks": (1000, 2),
+                            "chunks": (1000, 1),
                             "compression": 'gzip',
                             "compression_opts": 4
                         }
@@ -36,7 +36,7 @@ class H5Builder:
                             "shape": (0, 100),
                             "maxshape": (None, 100),
                             "dtype": 'f4',
-                            "chunks": (1000, 100),  # Fixed chunk size too
+                            "chunks": (1000, 100),  # Fixed chunk size
                             "compression": 'gzip',
                             "compression_opts": 4
                         }
