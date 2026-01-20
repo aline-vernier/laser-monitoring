@@ -21,7 +21,7 @@ class Laser_Data(Monitoring_Interface):
         self.device_data = {}
         self.verbose = verbose
 
-        self.serv = diagServer(parent=self, data={"state":"starting..."}, name='LaserData') # init the server
+        self.serv = diagServer(parent=self, data={"state": "starting..."}, name='LaserData') # init the server
         self.serv.start() # start the server thread
 
         self.data_saver = DataSaver(filename='./Data_Saver/laser_data.h5')
@@ -33,7 +33,7 @@ class Laser_Data(Monitoring_Interface):
         print(f'Tango version: {tango.__version__}')
 
     def load_config(self):  # To load from JSON
-        config_file_path = "./Config/tango_config.json"
+        config_file_path = "./Config/dummy_config.json"
         
         # Read configuration back from file
         loaded_config = readConfig(config_file_path)
@@ -88,8 +88,14 @@ class Laser_Data(Monitoring_Interface):
         self.update_graph(device, data)
         self.signalLaserDataDict.emit(dict(device_name=device_name, data=data)) # Signal for DiagServ
 
-        if self.devices[device_name].graph_type == 'rolling_1d':
-            self.data_saver.on_data_event(data['x'], device_name, data['y'])
+        if self.devices[device_name].graph_type in ['rolling_1d', 'static_1d']:
+            if self.devices[device_name].graph_type == 'rolling_1d':
+                self.data_saver.on_data_event(device_name, [data['x'], data['y']])
+
+            elif self.devices[device_name].graph_type == 'static_1d':
+                print(f'data type: {type(data['y'])}, length: {len(data['y'])}')
+                self.data_saver.on_data_event(device_name, data['y'])
+
         elif self.verbose:
             print(f'Method not implemented for device type: {self.devices[device_name].type}')
         else:

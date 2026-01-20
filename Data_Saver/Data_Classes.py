@@ -13,16 +13,6 @@ class DeviceConfig:
     input_dim: Optional[int] = None
     output_dim: Optional[int] = None
 
-DEVICES = [
-    DeviceConfig(id='temp_sensor', type='simple'),
-    DeviceConfig(
-        id='optimizer',
-        type='complex',
-        metadata={'opt_type': 'bayesian', 'model': 'gp'},
-        input_dim=5,
-        output_dim=2
-    ),
-]
 
 class H5Builder:
     """

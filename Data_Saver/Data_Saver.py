@@ -142,8 +142,8 @@ class DataSaver(QObject):
             return
             
         # Convert batch to numpy structured array for efficient writing
-        for timestamp, device_id, value in batch:
-            data = np.array([timestamp, value])
+        for device_id, value in batch:
+            data = np.array(value)
             self.h5_file.append_batch(device_id, data)
             
     
