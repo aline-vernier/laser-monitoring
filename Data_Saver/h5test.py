@@ -1,50 +1,26 @@
+import h5py
+import numpy as np
 
-if __name__ == "__main__":
+# Create a new HDF5 file with a resizable dataset
+with h5py.File('example.h5', 'w') as f:
+    # Create dataset with initial shape (0, columns) and maxshape allowing unlimited rows
+    dataset = f.create_dataset('data',
+                               shape=(0, 5),  # Start with 0 rows, 5 columns
+                               maxshape=(None, 5),  # Allow unlimited rows
+                               dtype='float32',
+                               chunks=True)  # Enable chunking for resizing
 
-    from Config.Config_RW import readConfig
-    from Device_Classes.Devices import DeviceMaker
-    import random
-    import time
-    # Initialize
-    devices = {}
-    numPoints = 100
-    data = np.array([range(0, numPoints)]).T
+# Append data
+with h5py.File('example.h5', 'a') as f:
+    dataset = f['data']
 
-    h5_file = H5Builder('./Data_Saver/realtime_data.h5')
-    config_file_path = "./Config/dummy_config.json"
-    
-    # Read configuration back from file
-    loaded_config = readConfig(config_file_path)
-    device_list = [loaded_config[key] for key in loaded_config]
-    for dev in device_list:
-            # Dictionary of device objects
-            device_id = dev['name']
-            device = DeviceMaker.create(dev)
-            devices[device_id] = device
-    builder = H5Builder(pathlib.Path("measurements.h5"))
+    for i in range(1, 20):
+        # Create new data to append
+        new_data = np.random.rand(10, 5)  # 10 new rows
 
-    builder.create_file(devices)
+        # Resize dataset to accommodate new data
+        current_size = dataset.shape[0]
+        dataset.resize(current_size + new_data.shape[0], axis=0)
 
-    t_0 = time.time()
-    for device in devices.values():
-        if device.graph_type == 'rolling_1d':
-            builder.append_data(device.name, timestamp=time.time()-t_0, value = random.uniform(8, 12))
-
-    # Or batch append  
-    for device in devices.values():
-        if device.graph_type == 'rolling_1d':
-            data_batch = np.array([
-                [time.time()-t_0, random.uniform(8, 12)], 
-                [time.time()-t_0, random.uniform(8, 12)], 
-                [time.time()-t_0, random.uniform(8, 12)]
-                ])
-            builder.append_batch(device.name, data_batch)
-
-
-    # Read back
-    for device in devices.values():
-        if device.graph_type == 'rolling_1d':
-            print(f'Data: {builder.get_device_data(device.name)}')
-
-
-
+        # Write new data
+        dataset[current_size:] = new_data

@@ -37,7 +37,7 @@ class H5Loader:
 
 
 if __name__ == '__main__':
-    h5_file = H5Loader('realtime_data.h5')
+    h5_file = H5Loader('example.h5')
 
     for device_group in h5_file.device_groups:
         for dataset_name in h5_file.device_datasets:

@@ -3,6 +3,7 @@ from datetime import datetime
 import random
 import numpy as np
 from PIL import Image
+import time
 
 class Data_Acquisition(QObject):
     """Base class that runs in a separate thread"""
@@ -19,21 +20,9 @@ class Data_Acquisition(QObject):
             self.parent = parent
         else:
             self.device_id = "Virtual Device"
-            self.data_type = "rolling_1d"
+            self.data_type = "static_1d"
             self.running = False
         self._t0 = None
-
-
-
-    def shape(self):
-        """Return the shape of the data produced by this device"""
-        self.start()
-        data = self.data_generator()
-        print(f'data: {data}')
-        shape = data['shape']
-        self.stop()
-        return shape
-          
 
     def start(self):
         """Called when moved to thread"""
@@ -54,10 +43,36 @@ class VirtualDevice(Data_Acquisition):
             'static_1d': (100,),
             'density_2d': (808, 608)
         }
-        self.im = np.array(Image.open('./Device_Classes/SampleImages/FOCAL_SPOT.TIFF')).T
+        try:
+            self.im = np.array(Image.open('./Device_Classes/SampleImages/FOCAL_SPOT.TIFF')).T
+        except Exception as e :
+            print(f'No image was found, {e}, trying elsewhere')
+        try:
+            self.im = np.array(Image.open('./SampleImages/FOCAL_SPOT.TIFF')).T
+        except Exception as e :
+            pass
+        self.shape = self._get_datadict_shape()
 
     def setup(self):
         pass
+
+    def _get_datadict_shape(self) -> dict:
+        """Return the shape of the data produced by this device"""
+        data = self.data_generator()
+        shape = {}
+
+        for key, value in data.items():
+            if type(value) is list:
+                shape[key] = (len(value),)
+            elif type(value) is np.ndarray:
+                shape[key] = value.shape
+            elif type(value) is float or int:
+                shape[key] = (1,)
+            else:
+                raise Exception(f'Unidentifed type')
+
+        return shape
+
 
     def _generate_data(self):
         
@@ -80,8 +95,13 @@ class VirtualDevice(Data_Acquisition):
             raise ValueError(f"Unknown graph type: {self.data_type}")
         
     def point_data(self):
+        if self._t0 is None:
+            t0 = datetime.now().timestamp()
+        else:
+            t0 = self._t0
+
         return {
-            'x': datetime.now().timestamp() - self._t0,
+            'x': datetime.now().timestamp() - t0,
             'y': random.uniform(0, 100)
         }   
 
@@ -113,7 +133,6 @@ class TangoDevice(Data_Acquisition):
             data[key] = self.parent.device_proxy.read_attribute(attribute).value
         self.data_received.emit(self.device_id, data)
 
-
         # Schedule next call
         QTimer.singleShot(self.period_ms, self._generate_data)
 
@@ -126,8 +145,8 @@ if __name__ == "__main__":
 
     virtual_device = VirtualDevice()
     virtual_device.data_received.connect(lambda device_id, data: print(f"Data from {device_id}: {data}"))
-    virtual_device.start()
-    print(f"From Data Acquisition ; Data shape: {virtual_device.shape()}")
-    virtual_device.stop()
+    #virtual_device.start()
+
+    #virtual_device.stop()
 
     sys.exit(app.exec())
