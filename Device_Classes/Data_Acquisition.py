@@ -106,17 +106,27 @@ class VirtualDevice(Data_Acquisition):
         }   
 
     def waveform_data(self):
+        if self._t0 is None:
+            t0 = datetime.now().timestamp()
+        else:
+            t0 = self._t0
         data_shape = self.data_shapes['static_1d'][0]
         return {
             'x': [i for i in range(data_shape)],
             'y': [random.uniform(0, 100) for _ in range(data_shape)],
+            'timestamp': datetime.now().timestamp() - t0
         }
 
     def image_data(self):
+        if self._t0 is None:
+            t0 = datetime.now().timestamp()
+        else:
+            t0 = self._t0
         data_shape = self.data_shapes['density_2d']
         data = self.im + np.random.randint(0, 20, data_shape)
         return {
             'image': data,
+            'timestamp': datetime.now().timestamp() - t0
         }
 
 

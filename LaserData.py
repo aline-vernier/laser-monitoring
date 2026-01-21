@@ -91,10 +91,12 @@ class Laser_Data(Monitoring_Interface):
 
         if self.devices[device_name].graph_type in ['rolling_1d', 'static_1d']:
             if self.devices[device_name].graph_type == 'rolling_1d':
-                self.data_saver.on_data_event(device_name, [data['y']])
+                #self.data_saver.on_data_event(device_name, [data['y']])
+                pass
 
             elif self.devices[device_name].graph_type == 'static_1d':
-                self.data_saver.on_data_event(device_name, data['y'])
+                pass
+                #self.data_saver.on_data_event(device_name, data['y'])
 
         elif self.verbose:
             print(f'Method not implemented for device type: {self.devices[device_name].type}')

@@ -1,34 +1,14 @@
 from tango import DeviceProxy
 import Device_Classes.Data_Acquisition as Data_Acquisition
 from PyQt6.QtCore import QObject, QThread
-
-from dataclasses import dataclass
 from abc import abstractmethod
 
-
+from Data_Saver.Data_Classes import DatasetSpec
 """
 To create new device, just specify it in device list, as Virtual Device 
 or Tango Device and add it to the DeviceMaker class
 """
 
-@dataclass(frozen=True)
-class DatasetSpec:
-    """Specification for a single HDF5 dataset"""
-    shape: tuple[int, ...]
-    dtype: str = 'float64'
-
-    def as_dict(self) -> dict:
-        return {"shape": self.shape, "dtype": self.dtype}
-
-    def __or__(self, other):
-        if isinstance(other, dict):
-            return self.as_dict() | other
-        return NotImplemented
-
-    def __ror__(self, other):
-        if isinstance(other, dict):
-            return other | self.as_dict()
-        return NotImplemented
 
 class Device(QObject):
     """
@@ -49,6 +29,14 @@ class Device(QObject):
     def _get_hf5_datasets(self, shape_dict: dict) -> dict[str, DatasetSpec]:
         """
         Build datasets for saving data from Data Acquisition
+        """
+        pass
+
+    @abstractmethod
+    def hf5_data_translator(self, data: dict) -> dict[str, ...]:
+        """
+        Reformats raw data from Data Acquisition
+        into an intelligible form for saving
         """
         pass
 
@@ -106,6 +94,18 @@ class DummyDevice(Device):
             'shot_number': DatasetSpec(shape=(1,), dtype='int32')
         }
 
+    def hf5_data_translator(self, data: dict) -> dict[str, ...]:
+        """
+        Reformats raw data from Data Acquisition
+        into an intelligible form for saving
+        """
+        hf5_datadict = {
+            'timestamp': data['x'],
+            'data': data['y'],
+            'shot_number': -1
+        }
+        return hf5_datadict
+
 
 class DummyDevice1D(Device):
     def __init__(self, definition: dict):
@@ -128,6 +128,13 @@ class DummyDevice1D(Device):
             'shot_number': DatasetSpec(shape=(1,), dtype='int32')
         }
 
+    def hf5_data_translator(self, data: dict) -> dict[str, ...]:
+        """
+        Reformats raw data from Data Acquisition
+        into an intelligible form for saving
+        """
+        pass
+
 
 class DummyDevice2D(Device):
     def __init__(self, definition: dict):
@@ -145,6 +152,13 @@ class DummyDevice2D(Device):
         return {'data': DatasetSpec(shape=shape_data, dtype='float32'),
                 'shot_number': DatasetSpec(shape=(1,), dtype='int32')
                 }
+
+    def hf5_data_translator(self):
+        """
+        Reformats raw data from Data Acquisition
+        into an intelligible form for saving
+        """
+        pass
 
 
 class Spectrometer(Device):

@@ -16,44 +16,18 @@ class H5Builder:
         _format_settings = {"chunks": True, "compression": 'gzip', "compression_opts": 4}
         with h5py.File(self.file, 'a') as f:
             for device_id, device in devices.items():
-
                 group_name = f'{device_id}'
-                for key, value in device.hf5_datasets.items():  # Each value is a DatasetSpec object
-                    dataset_name = group_name + f'/{key}'
-                    _format = _format_settings | value  # Concatenate the two dictionaries
-                    print(f'format: {_format}')
 
+                # Each dataset_spec value is a DatasetSpec object
+                for dataset_name, dataset_spec in device.hf5_datasets.items():
+                    dataset_address = group_name + f'/{dataset_name}'
+                    _format = _format_settings | dataset_spec  # Concatenate the two dictionaries
 
-                if device.graph_type in self.defined_datasets:
-                    #dataset_name = f'devices/{device_id}'
-
-                    if device.graph_type == 'rolling_1d':
-                        _format = {
-                            "name": dataset_name,
-                            "shape": (0, 1),
-                            "maxshape": (None, 1),
-                            "dtype": 'f4',
-                            "chunks": True,
-                            "compression": 'gzip',
-                            "compression_opts": 4
-                        }
-                    elif device.graph_type == 'static_1d':
-                        _format = {
-                            "name": dataset_name,
-                            "shape": (0, 100),
-                            "maxshape": (None, 100),
-                            "dtype": 'f4',
-                            "chunks": (1000, 100),  # Fixed chunk size
-                            "compression": 'gzip',
-                            "compression_opts": 4
-                        }
-
-                    if dataset_name not in f:
+                    if dataset_address not in f:
                         # Create dataset using _format dictionary
                         f.create_dataset(
-                            name=_format["name"],
+                            name=dataset_name,
                             shape=_format["shape"],  # ← Use _format
-                            maxshape=_format["maxshape"],
                             dtype=_format["dtype"],  # ← Use _format
                             chunks=_format["chunks"],  # ← Use _format
                             compression=_format["compression"],
@@ -61,8 +35,8 @@ class H5Builder:
                         )
 
                         # Store metadata as attributes
-                        f[dataset_name].attrs['device_name'] = device.name
-                        f[dataset_name].attrs['graph_type'] = device.graph_type
+                        f[dataset_address].attrs['device_name'] = device.name
+                        f[dataset_address].attrs['graph_type'] = device.graph_type
 
             print(f"Created datasets for {len(devices)} devices")
     def append_data(self, device_id: str, timestamp: float, value: float):
