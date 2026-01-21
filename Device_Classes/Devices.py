@@ -1,23 +1,34 @@
 from tango import DeviceProxy
 import Device_Classes.Data_Acquisition as Data_Acquisition
 from PyQt6.QtCore import QObject, QThread
+
 from dataclasses import dataclass
 from abc import abstractmethod
+
 
 """
 To create new device, just specify it in device list, as Virtual Device 
 or Tango Device and add it to the DeviceMaker class
 """
 
-
-@dataclass
+@dataclass(frozen=True)
 class DatasetSpec:
     """Specification for a single HDF5 dataset"""
     shape: tuple[int, ...]
-    dtype: str = 'float64'  # numpy dtype string
+    dtype: str = 'float64'
 
-    def __repr__(self):
-        return f"DatasetSpec(shape={self.shape}, dtype='{self.dtype}')"
+    def as_dict(self) -> dict:
+        return {"shape": self.shape, "dtype": self.dtype}
+
+    def __or__(self, other):
+        if isinstance(other, dict):
+            return self.as_dict() | other
+        return NotImplemented
+
+    def __ror__(self, other):
+        if isinstance(other, dict):
+            return other | self.as_dict()
+        return NotImplemented
 
 class Device(QObject):
     """

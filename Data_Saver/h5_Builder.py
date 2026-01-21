@@ -13,19 +13,19 @@ class H5Builder:
 
     def create_file(self, devices: dict[str, Any]):
         """Initialize datasets for each device"""
-        _format_settings = {}
+        _format_settings = {"chunks": True, "compression": 'gzip', "compression_opts": 4}
         with h5py.File(self.file, 'a') as f:
             for device_id, device in devices.items():
-                print(f'H5Builder :: device id: {device_id}, device hdf5_datasets: {device.hf5_datasets}')
-                group_name = f'{device_id}'
-                for key, value in device.hf5_datasets.items():
-                    dataset_name = group_name + f'/{key}'
-                    _format = value
 
+                group_name = f'{device_id}'
+                for key, value in device.hf5_datasets.items():  # Each value is a DatasetSpec object
+                    dataset_name = group_name + f'/{key}'
+                    _format = _format_settings | value  # Concatenate the two dictionaries
+                    print(f'format: {_format}')
 
 
                 if device.graph_type in self.defined_datasets:
-                    dataset_name = f'devices/{device_id}'
+                    #dataset_name = f'devices/{device_id}'
 
                     if device.graph_type == 'rolling_1d':
                         _format = {
@@ -33,7 +33,7 @@ class H5Builder:
                             "shape": (0, 1),
                             "maxshape": (None, 1),
                             "dtype": 'f4',
-                            "chunks": (1000, 1),
+                            "chunks": True,
                             "compression": 'gzip',
                             "compression_opts": 4
                         }
