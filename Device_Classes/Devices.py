@@ -34,19 +34,23 @@ class Device(QObject):
         print(f'Device is virtual: {self.isVirtual is True}')
         self.thread = QThread()
 
-    @property
     @abstractmethod
-    def hdf5_datasets(self) -> dict[str, DatasetSpec]:
+    def _get_hf5_datasets(self, shape_dict: dict) -> dict[str, DatasetSpec]:
+        """
+        Build datasets for saving data from Data Acquisition
+        """
         pass
 
-
-
-    def _start_thread(self):
+    def _instantiate_device(self):
         if self.isVirtual:
             self.worker = Data_Acquisition.VirtualDevice(parent=self)
+            self.hf5_datasets = self._get_hf5_datasets(self.worker.shape)
+            print(f'Datasets: {self.hf5_datasets}')
         else:
             self.worker = Data_Acquisition.TangoDevice(parent=self)
 
+
+    def _start_thread(self):
         self.worker.moveToThread(self.thread)
         # Connect thread started signal to worker start method
         self.thread.started.connect(self.worker.start)
@@ -57,7 +61,6 @@ class Device(QObject):
         except Exception:
             self.device_proxy = None
             raise Exception(f"Could not connect to device: {self.name}")
-
 
 
     def start_device(self):
@@ -77,13 +80,18 @@ class DummyDevice(Device):
         self.labels = {'x_label': 'Time',
                        'y_label': 'Signal', 'x_units': 's', 'y_units': 'V'}
         self.graph_type = 'rolling_1d'
+
+        self._instantiate_device()
         self._start_thread()
 
-    @property
-    def hdf5_datasets(self) -> dict[str, DatasetSpec]:
+
+    def _get_hf5_datasets(self, shape_dict: dict) -> dict[str, DatasetSpec]:
+
+        shape_x = shape_dict['x']
+        shape_data = shape_dict['y']
         return {
-            'timestamp': DatasetSpec(shape=(1,), dtype='float64'),
-            'data': DatasetSpec(shape=(1,), dtype='float64'),
+            'timestamp': DatasetSpec(shape=shape_x, dtype='float32'),
+            'data': DatasetSpec(shape=shape_data, dtype='float32'),
             'shot_number': DatasetSpec(shape=(1,), dtype='int32')
         }
 
@@ -95,8 +103,19 @@ class DummyDevice1D(Device):
                        'y_label': 'Signal', 'x_units': 's', 'y_units': 'V'}
         self.graph_type = 'static_1d'
 
+        self._instantiate_device()
         self._start_thread()
 
+
+    def _get_hf5_datasets(self, shape_dict: dict) -> dict[str, DatasetSpec]:
+
+        shape_x = shape_dict['x']
+        shape_data = shape_dict['y']
+        return {
+            'timestamp': DatasetSpec(shape=shape_x, dtype='float32'),
+            'data': DatasetSpec(shape=shape_data, dtype='float32'),
+            'shot_number': DatasetSpec(shape=(1,), dtype='int32')
+        }
 
 
 class DummyDevice2D(Device):
@@ -106,7 +125,16 @@ class DummyDevice2D(Device):
                        'y_label': 'y', 'x_units': 'px', 'y_units': 'px'}
         self.graph_type = 'density_2d'
 
+        self._instantiate_device()
         self._start_thread()
+
+    def _get_hf5_datasets(self, shape_dict: dict) -> dict[str, DatasetSpec]:
+
+        shape_data = shape_dict['image']
+        return {'data': DatasetSpec(shape=shape_data, dtype='float32'),
+                'shot_number': DatasetSpec(shape=(1,), dtype='int32')
+                }
+
 
 class Spectrometer(Device):
     def __init__(self, definition: dict):
@@ -118,6 +146,7 @@ class Spectrometer(Device):
         self.attrs = {'x': 'lambda', 'y': 'intensity'}
         self.graph_type = 'static_1d'
 
+        self._instantiate_device()
         self._start_thread()
 
 
@@ -129,6 +158,8 @@ class BeamAnalyzer(Device):
         self.attrs = ('Centroid X', 'Centroid Y', 'Max Intensity',
                       'Peak X', 'Peak Y', 'Variance X', 'Variance Y')
         self.graph_type = None
+
+        self._instantiate_device()
         self._start_thread()
 
 class EnergyMeter(Device):
@@ -138,6 +169,8 @@ class EnergyMeter(Device):
         self.labels = {'x_label': 'time', 'y_label': 'Energy', 'x-units': '(s)', 'y_units': '(mJ)'}
         self.attrs = {'x': None, 'y': 'energy_1'}
         self.graph_type = 'rolling_1d'
+
+        self._instantiate_device()
         self._start_thread()
 
 

@@ -10,6 +10,7 @@ from diagServer.diagServer import diagServer
 from Config.Config_RW import readConfig
 from Data_Saver.Data_Saver import DataSaver
 
+
 class Laser_Data(Monitoring_Interface):
     signalLaserDataDict = QtCore.pyqtSignal(object)
     def __init__(self, polling_period: float, buffer_size: int=1000, verbose: bool=False):

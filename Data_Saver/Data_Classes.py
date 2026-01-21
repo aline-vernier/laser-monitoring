@@ -4,16 +4,6 @@ import h5py
 from Device_Classes.Devices import DeviceMaker
 
 
-@dataclass
-class DeviceConfig:
-    id: str
-    type: str
-    metadata: Optional[Dict] = field(default_factory=dict)
-    shape: Optional[Tuple] = None
-    input_dim: Optional[int] = None
-    output_dim: Optional[int] = None
-
-
 class H5Builder:
     """
     To create the file structure, takes a list of anything with a name attribute, and a dict as data.

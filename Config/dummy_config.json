@@ -10,5 +10,11 @@
         "address": "",
         "type": "dummy device",
         "is virtual" : true
+    },
+    "device_3": {
+        "name": "Camera 1",
+        "address": "",
+        "type": "dummy device 2D",
+        "is virtual" : true
     }
 }
