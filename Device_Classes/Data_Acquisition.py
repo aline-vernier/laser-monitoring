@@ -15,12 +15,14 @@ class Data_Acquisition(QObject):
         if parent:
             self.device_id = parent.name
             self.data_type = parent.graph_type
+            self.polling_period = parent.polling_period
             self.running = False
             self.parent = parent
         else:
             self.device_id = "Virtual Device"
             self.data_type = "rolling_1d"
             self.running = False
+            self.polling_period = 2
         self._t0 = None
 
 
@@ -38,7 +40,7 @@ class Data_Acquisition(QObject):
     def start(self):
         """Called when moved to thread"""
         self.running = True
-        self.period_ms = 500  # Set default period if not set
+        self.period_ms = int(self.polling_period*1000)  # Set default period if not set
         self._t0 = datetime.now().timestamp()
         self._generate_data()  # Start the cycle 
     

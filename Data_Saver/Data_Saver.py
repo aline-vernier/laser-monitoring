@@ -32,7 +32,8 @@ class DataSaver(QObject):
         self.dropped_count = 0
         
         # HDF5 file and table
-        self.h5_file = H5Builder('./Data_Saver/realtime_data.h5')
+        #self.h5_file = H5Builder('./Data_Saver/realtime_data.h5')
+        self.h5_file = H5Builder(filename)
         
 
     def start(self, devices: dict):

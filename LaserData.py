@@ -12,7 +12,9 @@ from Data_Saver.Data_Saver import DataSaver
 
 class Laser_Data(Monitoring_Interface):
     signalLaserDataDict = QtCore.pyqtSignal(object)
-    def __init__(self, polling_period: float, buffer_size: int=1000, verbose: bool=False):
+
+    def __init__(self, polling_period: float, buffer_size: int = 1000,
+                 verbose: bool = False, filename: str = './Data_Saver/laser_data.h5'):
         super().__init__(buffer_size)
         self.setup()
         self.devices = {}
@@ -24,7 +26,7 @@ class Laser_Data(Monitoring_Interface):
         self.serv = diagServer(parent=self, data={"state": "starting..."}, name='LaserData') # init the server
         self.serv.start() # start the server thread
 
-        self.data_saver = DataSaver(filename='./Data_Saver/laser_data.h5')
+        self.data_saver = DataSaver(filename=filename)
        
     def setup(self):
 
@@ -46,7 +48,7 @@ class Laser_Data(Monitoring_Interface):
             try:
                 # Dictionary of device objects
                 device_name = dev['name']
-                device = DeviceMaker.create(dev)
+                device = DeviceMaker.create(dev, polling_period=0.5)
                 self.devices[device_name] = device
                 
                 self.connect_device_signals(device)
@@ -93,8 +95,7 @@ class Laser_Data(Monitoring_Interface):
                 self.data_saver.on_data_event(device_name, [data['x'], data['y']])
 
             elif self.devices[device_name].graph_type == 'static_1d':
-                #print(f'data type: {type(data['y'])}, length: {len(data['y'])}')
-                self.data_saver.on_data_event(device_name, data['y'])
+                    self.data_saver.on_data_event(device_name, data['y'])
 
         elif self.verbose:
             print(f'Method not implemented for device type: {self.devices[device_name].type}')
@@ -120,7 +121,7 @@ if __name__ == "__main__":
 
     appli = QApplication(sys.argv)
     appli.setStyleSheet(qdarkstyle.load_stylesheet(qt_api='pyqt6'))
-    laser_data = Laser_Data(polling_period=1, verbose=False)
+    laser_data = Laser_Data(polling_period=1, verbose=False, filename='./Data_Saver/my_laser_data.h5')
     laser_data.load_config()
     laser_data.create_devices()
     laser_data.configure_h5File()
