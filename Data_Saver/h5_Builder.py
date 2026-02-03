@@ -4,11 +4,14 @@ import pathlib
 from typing import Dict, Any
 from threading import Lock
 import time
+from Data_Saver.Nested_Dir import main
 
 
 class H5Builder:
     def __init__(self, file: pathlib.Path):
         self.file = file
+        created_path = main()
+        print(f'Created path: {created_path}')
         self.lock = Lock()  # Thread safety for async operations
         self.defined_datasets = ['rolling_1d', 'static_1d']
 
