@@ -1,17 +1,5 @@
 {
     "device_1": {
-        "name": "Spectrometer",
-        "address": "",
-        "type": "dummy device 1D",
-        "is virtual" : true
-    },
-    "device_2": {
-        "name": "Energymeter 1",
-        "address": "",
-        "type": "dummy device",
-        "is virtual" : true
-    },
-    "device_3": {
         "name": "Camera 1",
         "address": "",
         "type": "dummy device 2D",

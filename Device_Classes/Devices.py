@@ -2,7 +2,6 @@ from tango import DeviceProxy
 import Device_Classes.Data_Acquisition as Data_Acquisition
 from PyQt6.QtCore import QObject, QThread
 from abc import abstractmethod
-
 from Data_Saver.Data_Classes import DatasetSpec
 """
 To create new device, just specify it in device list, as Virtual Device 
