@@ -93,7 +93,7 @@ class Laser_Data(Monitoring_Interface):
                 self.data_saver.on_data_event(device_name, [data['x'], data['y']])
 
             elif self.devices[device_name].graph_type == 'static_1d':
-                print(f'data type: {type(data['y'])}, length: {len(data['y'])}')
+                #print(f'data type: {type(data['y'])}, length: {len(data['y'])}')
                 self.data_saver.on_data_event(device_name, data['y'])
 
         elif self.verbose:

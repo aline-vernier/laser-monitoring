@@ -51,7 +51,7 @@ class VirtualDevice(Data_Acquisition):
         super().__init__(parent)
         self.data_shapes = {
             'rolling_1d': (1,),
-            'static_1d': (100,),
+            'static_1d': (2048,),
             'density_2d': (808, 608)
         }
         self.im = np.array(Image.open('./Device_Classes/SampleImages/FOCAL_SPOT.TIFF')).T

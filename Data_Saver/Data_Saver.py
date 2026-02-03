@@ -13,7 +13,7 @@ class DataSaver(QObject):
     buffer_warning = pyqtSignal(int)  # Emitted when buffer fills up
     data_saved = pyqtSignal(int)      # Emitted after batch write (count)
     
-    def __init__(self,filename, batch_size=1000, max_buffer=10000, flush_interval=1.0):
+    def __init__(self, filename, batch_size=2048, max_buffer=20480, flush_interval=30):
         super().__init__()
         self.filename = filename
         self.batch_size = batch_size
@@ -71,14 +71,6 @@ class DataSaver(QObject):
     @pyqtSlot(float, int, int)
     @pyqtSlot(object)
     def on_data_event(self, *args):
-        """
-        Fast event handler - just adds data to buffer
-        
-        Can be called as:
-        - on_data_event(timestamp, device_id, value)
-        - on_data_event((timestamp, device_id, value))
-        - on_data_event({'timestamp': t, 'device_id': c, 'value': v})
-        """
         if not self.running:
             return
             
@@ -91,6 +83,7 @@ class DataSaver(QObject):
                 data_point = data
         else:
             data_point = args
+            #print(f'data point: {data_point}')
        
         # Try to add to buffer (non-blocking)
         try:
@@ -136,7 +129,7 @@ class DataSaver(QObject):
 
     def _write_batch(self, batch):
         """Write a batch of data points to HDF5"""
-        print(f'batch: {batch}')
+        print(f'Writing batch')
         if not batch or self.h5_file is None:
             print("No data to write or h5 file not initialized.")
             return

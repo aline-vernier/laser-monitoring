@@ -3,6 +3,7 @@ import numpy as np
 import pathlib
 from typing import Dict, Any
 from threading import Lock
+import time
 
 
 class H5Builder:
@@ -33,10 +34,10 @@ class H5Builder:
                     elif device.graph_type == 'static_1d':
                         _format = {
                             "name": dataset_name,
-                            "shape": (0, 100),
-                            "maxshape": (None, 100),
+                            "shape": (0, 2048),
+                            "maxshape": (None, 2048),
                             "dtype": 'f4',
-                            "chunks": (1000, 100),  # Fixed chunk size too
+                            "chunks": (1000, 2048),  # Fixed chunk size too
                             "compression": 'gzip',
                             "compression_opts": 4
                         }
@@ -77,11 +78,9 @@ class H5Builder:
 
     def append_batch(self, device_id: str, data: np.ndarray):
         """Append multiple (timestamp, value) pairs at once
-        
-        Args:
-            device_id: Device identifier
-            data: Nx2 array where column 0 is timestamps, column 1 is values
+
         """
+        t_0 = time.time()
         with self.lock:
             with h5py.File(self.file, 'a') as f:
                 dataset_name = f'devices/{device_id}'
@@ -92,12 +91,16 @@ class H5Builder:
                 
                 dataset = f[dataset_name]
                 current_size = dataset.shape[0]
+                print(f'Current size: {dataset.shape}')
                 
                 # Resize and append
 
-                dataset.resize(current_size + len(data), axis=0)
+                #dataset.resize(current_size + len(data), axis=0)
+                dataset.resize(current_size + 1, axis=0)
+
                 print(f'Device id: {device_id}, length of data: {len(data)}')
                 dataset[current_size:] = data
+        print(f'saving batch took {time.time()-t_0}s')
     
     def get_device_data(self, device_id: str) -> np.ndarray:
         """Retrieve all data for a specific device"""
@@ -116,17 +119,3 @@ class H5Builder:
                 return list(f['devices'].keys())
             return []
 
-class PointDataset:
-    def __init__ (self, device: Any):
-        pass
-
-        
-    
-
-
-class WaveformDataset:
-    pass
-class imageDataset:
-    pass
-class BODataset:
-    pass
