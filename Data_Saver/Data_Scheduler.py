@@ -36,9 +36,6 @@ if __name__ == "__main__":
     # Usage
     scheduler = DataSaveScheduler(handler)
     scheduler.register_device("device_1", 5000)  # Save every 5 seconds
-    scheduler.register_device("device_2", 10000)  # Save every 10 seconds
 
-
-    # In your data event handler:
     def on_device_event(device_id, data):
         scheduler.on_data_received(device_id, data)  # Store for periodic save

@@ -14,34 +14,35 @@ from Data_Saver.Data_Scheduler import DataSaveScheduler
 class Laser_Data(Monitoring_Interface):
     signalLaserDataDict = QtCore.pyqtSignal(object)
 
-    def __init__(self, polling_period: float, buffer_size: int = 1000,
-                 verbose: bool = False, filename: str = 'laser_data.h5', root_path: str = './Data'):
+    def __init__(self, polling_period: float, buffer_size: int = 1000, config_file: str = "./Config/dummy_config.json",
+                 verbose: bool = False, filename: str = 'laser_data.h5', root_path: str = './Data',
+                 data_flush_period: int=30):
         super().__init__(buffer_size)
-        self.data_saver = DataSaver(filename=filename, root_path=root_path)
-        self.setup()
+        self.verbose = verbose
+        self.config_file = config_file
+
+        self.setup(filename, root_path, data_flush_period)
         self.devices = {}
         self.polling_period = polling_period
         self._buffer_size = buffer_size
-        #self.device_data = {}
-        #self.latest_data = {}
-        self.verbose = verbose
+
         self.serv = diagServer(parent=self, data={"state": "starting..."}, name='LaserData') # init the server
         self.serv.start()  # start the server thread
 
 
-       
-    def setup(self):
+    def setup(self, filename, root_path, data_flush_period):
 
         tango_host = tango.ApiUtil.get_env_var("TANGO_HOST")
         print(f'Tango host: {tango_host}')
         print(f'Tango version: {tango.__version__}')
+
+        self.data_saver = DataSaver(filename=filename, root_path=root_path, flush_interval=data_flush_period)
         self.scheduler = DataSaveScheduler(self.data_saver.on_data_event)
 
     def load_config(self):  # To load from JSON
-        config_file_path = "./Config/dummy_config.json"
-        
+
         # Read configuration back from file
-        loaded_config = readConfig(config_file_path)
+        loaded_config = readConfig(self.config_file)
         self.device_list = [loaded_config[key] for key in loaded_config]
  
 
@@ -95,15 +96,13 @@ class Laser_Data(Monitoring_Interface):
         self.update_graph(device, data)
         self.signalLaserDataDict.emit(dict(device_name=device_name, data=data)) # Signal for DiagServ
 
-
         if self.devices[device_name].graph_type in ['rolling_1d', 'static_1d']:
             if self.devices[device_name].graph_type == 'rolling_1d':
-                #self.data_saver.on_data_event(device_name, [data['x'], data['y']])
-                self.scheduler.on_data_received(device_name, [data['x'], data['y']])
+                _data = [data['x'], data['y']]
 
             elif self.devices[device_name].graph_type == 'static_1d':
-                # self.data_saver.on_data_event(device_name, data['y'])
-                self.scheduler.on_data_received(device_name, data['y'])
+                _data = data['y']
+            self.scheduler.on_data_received(device_name, _data)
 
 
         elif self.verbose:
@@ -129,7 +128,9 @@ if __name__ == "__main__":
 
     appli = QApplication(sys.argv)
     appli.setStyleSheet(qdarkstyle.load_stylesheet(qt_api='pyqt6'))
-    laser_data = Laser_Data(polling_period=1, verbose=False, filename='laser_data.h5', root_path='./Data')
+    laser_data = Laser_Data(polling_period=1, verbose=False, filename='laser_data.h5',
+                            root_path='./Data', config_file="./Config/dummy_config.json",
+                            data_flush_period=60)
     laser_data.load_config()
     laser_data.create_devices()
     laser_data.configure_h5File()
