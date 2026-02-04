@@ -25,13 +25,14 @@ sepa = os.sep
 
 
 class Monitoring_Interface(QMainWindow):
-    def __init__(self, buffer_size: int=1000):
+    def __init__(self):
         super().__init__()
         p = pathlib.Path(__file__)
         self.icon = str(p.parent / 'icons')
         print(f'Icon path: {self.icon + "/LOA.png"}')
         self.name = "VISU"
         self.setup_interface()
+        self.setup_button_actions()
         self.graphs = {}
         self.graph_widgets = {}
         
@@ -61,8 +62,6 @@ class Monitoring_Interface(QMainWindow):
         self.optionAutoSaveAct.triggered.connect(
             lambda: self.open_widget(self.winOpt))
         
-
-
         #####################################################################
         #                   Global layout and geometry
         #####################################################################
@@ -85,17 +84,38 @@ class Monitoring_Interface(QMainWindow):
         MainWidget.setLayout(self.hbox)
         self.setCentralWidget(MainWidget)
 
-        # LHS vertical box with stacked graphs
+        # Vertical box with stacked 0D graphs
         self.vbox1 = QVBoxLayout()
         self.vbox1.setSpacing(0)
         self.vbox1.setContentsMargins(0, 0, 0, 0)
         self.hbox.addLayout(self.vbox1)
 
-        # RHS vertical box with controls and indicators
+        # Vertical box with stacked 1D and 2D graph
         self.vbox2 = QVBoxLayout()
         self.vbox2.setSpacing(0)
         self.vbox2.setContentsMargins(0, 0, 0, 0)
         self.hbox.addLayout(self.vbox2)
+
+        # Vertical box with controls and indicators
+        self.vbox3 = QVBoxLayout()
+        self.vbox3.setSpacing(0)
+        self.vbox3.setContentsMargins(0, 0, 0, 0)
+        self.hbox.addLayout(self.vbox3)
+
+        ######################
+        #    Graph controls
+        ######################
+
+        grid_layout_graph_functions = QGridLayout()
+        graph_settings = QLabel('Graph settings')
+        self.clear_graphs_ctl = QPushButton(text="Clear Graphs")
+        grid_layout_graph_functions.addWidget(graph_settings, 0, 0)
+        grid_layout_graph_functions.addWidget(self.clear_graphs_ctl, 1, 0)
+        self.vbox3.addLayout(grid_layout_graph_functions)
+        self.vbox3.addStretch(1)
+
+    def setup_button_actions(self):
+        self.clear_graphs_ctl.clicked.connect(self.clear_graphs)
 
     def open_widget(self, win):
         """ open new widget
@@ -132,6 +152,11 @@ class Monitoring_Interface(QMainWindow):
             GraphUpdater(graph).update(data)
         else:
             print(f"Warning: No graph found for device '{device.name}'")
+
+    def clear_graphs(self):
+        for device_id, graph in self.graphs.items():
+            graph.clear_graph()
+
 
 
 if __name__ == "__main__":

@@ -33,7 +33,6 @@ class DataSaver(QObject):
         self.dropped_count = 0
         
         # HDF5 file and table
-        #self.h5_file = H5Builder('./Data_Saver/realtime_data.h5')
         self.h5_file = H5Builder(filename, root_path)
         
 
@@ -45,7 +44,7 @@ class DataSaver(QObject):
         # Configure HDF5 file
         self.h5_file.create_file(devices=devices)
 
-        
+
         # Start writer thread
         self.running = True
         self.writer_thread = threading.Thread(target=self._write_loop, daemon=True)
@@ -66,8 +65,7 @@ class DataSaver(QObject):
         
         # Flush any remaining data
         self._flush_buffer()
-        
-            
+
         print(f"Data saver stopped. Saved: {self.total_saved}, Dropped: {self.dropped_count}")
         
     @pyqtSlot(float, int, int)
@@ -85,8 +83,7 @@ class DataSaver(QObject):
                 data_point = data
         else:
             data_point = args
-            #print(f'data point: {data_point}')
-       
+
         # Try to add to buffer (non-blocking)
         try:
             self.buffer.put_nowait(data_point)
@@ -140,8 +137,7 @@ class DataSaver(QObject):
         for device_id, value in batch:
             data = np.array(value)
             self.h5_file.append_batch(device_id, data)
-            
-    
+
         self.total_saved += len(batch)
         self.data_saved.emit(len(batch))
         

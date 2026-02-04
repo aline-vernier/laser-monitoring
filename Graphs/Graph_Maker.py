@@ -28,6 +28,10 @@ class Graph(QWidget):
     def update_graph(self, data: dict):
         pass
 
+    @abstractmethod
+    def clear_graph(self):
+        pass
+
 
 class RollingGraph(Graph, Dark_StyleSheet):
     def __init__(self, device: Device):
@@ -46,18 +50,20 @@ class RollingGraph(Graph, Dark_StyleSheet):
         self.y.append(y)
         self.curve.setData(list(self.x), list(self.y))
 
+    def clear_graph(self):
+        self.x.clear()
+        self.y.clear()
+
 class StaticGraph(Graph, Dark_StyleSheet):
     def __init__(self, device: Device):
         super().__init__(device)
         self.set_dark_mode()
         self.set_axes() # From Dark_StyleSheet
         self.set_labels() # From Dark_StyleSheet
-   
 
     def update_graph(self, data: dict):
         self.x = data.get('x', 0)
         self.y = data.get('y', 0)
-        #self.plot.clear()
         self.curve.setData(list(self.x), list(self.y))
 
 class DensityGraph(Graph, Dark_StyleSheet):
