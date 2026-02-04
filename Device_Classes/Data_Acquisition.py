@@ -26,7 +26,6 @@ class Data_Acquisition(QObject):
         self._t0 = None
 
 
-
     def shape(self):
         """Return the shape of the data produced by this device"""
         self.start()

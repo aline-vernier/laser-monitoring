@@ -1,6 +1,6 @@
 import tango
 from PyQt6.QtWidgets import QApplication
-from PyQt6.QtCore import pyqtSlot
+from PyQt6.QtCore import pyqtSlot, QTimer
 from PyQt6 import QtCore
 import sys
 import qdarkstyle
@@ -9,6 +9,7 @@ from Build_Interface import Monitoring_Interface
 from diagServer.diagServer import diagServer
 from Config.Config_RW import readConfig
 from Data_Saver.Data_Saver import DataSaver
+from Data_Saver.Data_Scheduler import DataSaveScheduler
 
 class Laser_Data(Monitoring_Interface):
     signalLaserDataDict = QtCore.pyqtSignal(object)
@@ -16,23 +17,25 @@ class Laser_Data(Monitoring_Interface):
     def __init__(self, polling_period: float, buffer_size: int = 1000,
                  verbose: bool = False, filename: str = 'laser_data.h5', root_path: str = './Data'):
         super().__init__(buffer_size)
+        self.data_saver = DataSaver(filename=filename, root_path=root_path)
         self.setup()
         self.devices = {}
         self.polling_period = polling_period
         self._buffer_size = buffer_size
-        self.device_data = {}
+        #self.device_data = {}
+        #self.latest_data = {}
         self.verbose = verbose
-
         self.serv = diagServer(parent=self, data={"state": "starting..."}, name='LaserData') # init the server
         self.serv.start()  # start the server thread
 
-        self.data_saver = DataSaver(filename=filename, root_path=root_path)
+
        
     def setup(self):
 
         tango_host = tango.ApiUtil.get_env_var("TANGO_HOST")
         print(f'Tango host: {tango_host}')
         print(f'Tango version: {tango.__version__}')
+        self.scheduler = DataSaveScheduler(self.data_saver.on_data_event)
 
     def load_config(self):  # To load from JSON
         config_file_path = "./Config/dummy_config.json"
@@ -48,7 +51,8 @@ class Laser_Data(Monitoring_Interface):
             try:
                 # Dictionary of device objects
                 device_name = dev['name']
-                device = DeviceMaker.create(dev, polling_period=self.polling_period)
+                device = DeviceMaker.create(dev, polling_period=dev['polling period'])
+                self.scheduler.register_device(device_name, saving_period=dev['saving period'])
                 self.devices[device_name] = device
                 
                 self.connect_device_signals(device)
@@ -73,6 +77,7 @@ class Laser_Data(Monitoring_Interface):
         """Start monitoring all devices"""
         for device in self.devices.values():
             device.start_device()
+
     
     def stop_all_devices(self):
         """Stop monitoring all devices"""
@@ -90,12 +95,16 @@ class Laser_Data(Monitoring_Interface):
         self.update_graph(device, data)
         self.signalLaserDataDict.emit(dict(device_name=device_name, data=data)) # Signal for DiagServ
 
+
         if self.devices[device_name].graph_type in ['rolling_1d', 'static_1d']:
             if self.devices[device_name].graph_type == 'rolling_1d':
-                self.data_saver.on_data_event(device_name, [data['x'], data['y']])
+                #self.data_saver.on_data_event(device_name, [data['x'], data['y']])
+                self.scheduler.on_data_received(device_name, [data['x'], data['y']])
 
             elif self.devices[device_name].graph_type == 'static_1d':
-                    self.data_saver.on_data_event(device_name, data['y'])
+                # self.data_saver.on_data_event(device_name, data['y'])
+                self.scheduler.on_data_received(device_name, data['y'])
+
 
         elif self.verbose:
             print(f'Method not implemented for device type: {self.devices[device_name].type}')

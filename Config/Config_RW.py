@@ -29,27 +29,33 @@ if __name__ == "__main__":
         "device_1": {
             "name": "Dummy device 1",
             "address": "",
-            "type": "dummy device"
-        }, 
+            "type": "dummy device",
+            "period": 1
+        },
         "device_2": {
             "name": "Dummy device 2",
             "address": "",
-            "type": "dummy device 1D"
+            "type": "dummy device 1D",
+            "period": 5
+
         },
         "device_3": {
             "name": "Dummy device 3",
             "address": "",
-            "type": "dummy device 2D"   
+            "type": "dummy device 2D",
+            "period": 3600
         }, 
         "device_4": {
             "name": "Dummy device 4",
             "address": "",
-            "type": "dummy device 2D"   
+            "type": "dummy device 2D",
+            "period": 3600
         }, 
         "device_5": {
             "name": "Dummy device 4",
             "address": "",
-            "type": "dummy device 2D"   
+            "type": "dummy device 2D",
+            "period": 3600
         }
     }    
     config_file_path = "./Config/dummy_config.json"

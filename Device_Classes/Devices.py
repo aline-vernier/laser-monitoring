@@ -4,7 +4,7 @@ import Device_Classes.Data_Acquisition as Data_Acquisition
 from PyQt6.QtCore import QObject, QThread
 
 from dataclasses import dataclass, field
-from typing import Optional, Dict, Tuple, Any
+from typing import Optional, Dict, Tuple
 
 """
 To create new device, just specify it in device list, as Virtual Device 

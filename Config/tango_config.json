@@ -3,25 +3,29 @@
         "name": "Spectrometer 1",
         "address": "SY-SPECTRO_1/Spectrometer/FE1",
         "type": "spectrometer",
-        "is virtual" : false
+        "is virtual" : false,
+        "saving period": 10
     },
     "device_2": {
         "name": "Spectrometer 2",
         "address": "SY-SPECTRO_1/Spectrometer/FE1",
         "type": "spectrometer",
-        "is virtual" : false
+        "is virtual" : false,
+        "saving period": 10
     },
     "device_3": {
         "name": "Spectrometer 3",
         "address": "SY-SPECTRO_1/Spectrometer/FE1",
         "type": "spectrometer",
-        "is virtual" : false
+        "is virtual" : false,
+        "saving period": 10
     },
     "device_4": {
         "name": "Energy meter 1",
         "address": "",
         "type": "dummy device",
-        "is virtual" : true
+        "is virtual" : true,
+        "saving period": 1
     }
 
 }

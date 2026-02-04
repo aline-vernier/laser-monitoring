@@ -3,12 +3,16 @@
         "name": "Spectrometer",
         "address": "",
         "type": "dummy device 1D",
-        "is virtual" : true
+        "is virtual" : true,
+        "saving period": 10,
+        "polling period": 1
     },
     "device_2": {
         "name": "Energymeter 1",
         "address": "",
         "type": "dummy device",
-        "is virtual" : true
+        "is virtual" : true,
+        "saving period": 1,
+        "polling period": 0.1
     }
 }
