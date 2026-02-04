@@ -4,14 +4,15 @@ import pathlib
 from typing import Dict, Any
 from threading import Lock
 import time
-from Data_Saver.Nested_Dir import main
+from Data_Saver.Nested_Dir import create_date_folders
 
 
 class H5Builder:
-    def __init__(self, file: pathlib.Path):
-        self.file = file
-        created_path = main()
+    def __init__(self, filename: str, root_path: str = './Data'):
+
+        created_path = create_date_folders(root_path)
         print(f'Created path: {created_path}')
+        self.file = created_path / filename
         self.lock = Lock()  # Thread safety for async operations
         self.defined_datasets = ['rolling_1d', 'static_1d']
 

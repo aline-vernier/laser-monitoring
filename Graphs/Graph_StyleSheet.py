@@ -2,7 +2,38 @@ from matplotlib.pyplot import plot
 from Graphs.Colours import *
 import random
 import pyqtgraph as pg
+import numpy as np
 
+class CustomAxisItem(pg.AxisItem):
+    """ Class that overrides the AxisItem tickStrings and labelString methods which give '1 knm'
+    as a unit instead of showing '1000 nm', which is objectively ugly as hell. """
+
+    def tickStrings(self, values, scale, spacing):
+
+        if self.logMode:
+            return self.logTickStrings(values, scale, spacing)
+
+        places = max(0, np.ceil(-np.log10(spacing*scale)))
+        strings = []
+        for v in values:
+            vs = v * scale
+            vstr = ("%%0.%df" % places) % vs
+            strings.append(vstr)
+        return strings
+
+    def labelString(self):
+        if self.labelUnits == '':
+            if not self.autoSIPrefix or self.autoSIPrefixScale == 1.0:
+                units = ''
+            else:
+                units = '(x%g)' % (1.0/self.autoSIPrefixScale)
+        else:
+            # units = '(%s%s)' % (self.labelUnitPrefix, self.labelUnits)
+            units = self.labelUnits
+        s = '%s %s' % (self.labelText, units)
+        style = ';'.join(['%s: %s' % (k, self.labelStyle[k]) for k in self.labelStyle])
+
+        return "<span style='%s'>%s</span>" % (style, s)
 
 class Dark_StyleSheet():
     """
@@ -32,9 +63,10 @@ class Dark_StyleSheet():
         
 
     def set_labels(self):
+        self.plot.setAxisItems({'bottom': CustomAxisItem('bottom')})
         label_style = {'color': silver, 'font-size': '10pt', 'font-family': 'Sergoe UI'}
         self.plot.setLabel('bottom', self.x_label, units=self.x_units, **label_style)
-        self.plot.setLabel('left', self.y_label, units=self.y_units, **label_style)  
+        self.plot.setLabel('left', self.y_label, units=self.y_units, **label_style)
 
     def set_2D_plot_darkstyle(self):
         self.graph.setBackground(anthracite) 

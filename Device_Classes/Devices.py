@@ -75,7 +75,7 @@ class DummyDevice(Device):
     def __init__(self, definition: dict, polling_period: float):
         super().__init__(definition, polling_period)
         self.labels = {'x_label': 'Time',
-                       'y_label': 'Signal', 'x_units': 's', 'y_units': 'V'}
+                       'y_label': 'Signal', 'x_units': 's', 'y_units': 'a.u.'}
         self.graph_type = 'rolling_1d'
 
         self._start_thread()
@@ -84,8 +84,8 @@ class DummyDevice(Device):
 class DummyDevice1D(Device):
     def __init__(self, definition: dict, polling_period: float):
         super().__init__(definition, polling_period)
-        self.labels = {'x_label': 'Time',
-                       'y_label': 'Signal', 'x_units': 's', 'y_units': 'V'}
+        self.labels = {'x_label': 'Wavelength',
+                       'y_label': 'Signal', 'x_units': 'nm', 'y_units': 'a.u.'}
         self.graph_type = 'static_1d'
 
         self._start_thread()
@@ -127,7 +127,7 @@ class EnergyMeter(Device):
     def __init__(self, definition: dict, polling_period: float):
         super().__init__(definition, polling_period)
         self.setup()
-        self.labels = {'x_label': 'time', 'y_label': 'Energy', 'x-units': '(s)', 'y_units': '(mJ)'}
+        self.labels = {'x_label': 'time', 'y_label': 'Energy', 'x_units': '(s)', 'y_units': '(mJ)'}
         self.attrs = {'x': None, 'y': 'energy_1'}
         self.graph_type = 'rolling_1d'
         self._start_thread()

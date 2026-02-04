@@ -1,5 +1,3 @@
-
-
 from Graphs.Graph_StyleSheet import Dark_StyleSheet
 from Device_Classes.Devices import Device
 import Device_Classes.Devices as Devices
@@ -8,6 +6,7 @@ from PyQt6.QtWidgets import QWidget
 import pyqtgraph as pg
 from collections import deque
 from abc import abstractmethod
+
 
 
 class Graph(QWidget):
@@ -109,6 +108,8 @@ class GraphUpdater:
     def update(self, data: dict):
         """Update the graph with new data - delegates to graph's own method"""
         self.graph.update_graph(data)
+
+
 
 if __name__ == "__main__":
     app = pg.mkQApp()

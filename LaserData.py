@@ -14,7 +14,7 @@ class Laser_Data(Monitoring_Interface):
     signalLaserDataDict = QtCore.pyqtSignal(object)
 
     def __init__(self, polling_period: float, buffer_size: int = 1000,
-                 verbose: bool = False, filename: str = './Data_Saver/laser_data.h5'):
+                 verbose: bool = False, filename: str = 'laser_data.h5', root_path: str = './Data'):
         super().__init__(buffer_size)
         self.setup()
         self.devices = {}
@@ -24,9 +24,9 @@ class Laser_Data(Monitoring_Interface):
         self.verbose = verbose
 
         self.serv = diagServer(parent=self, data={"state": "starting..."}, name='LaserData') # init the server
-        self.serv.start() # start the server thread
+        self.serv.start()  # start the server thread
 
-        self.data_saver = DataSaver(filename=filename)
+        self.data_saver = DataSaver(filename=filename, root_path=root_path)
        
     def setup(self):
 
@@ -48,7 +48,7 @@ class Laser_Data(Monitoring_Interface):
             try:
                 # Dictionary of device objects
                 device_name = dev['name']
-                device = DeviceMaker.create(dev, polling_period=0.5)
+                device = DeviceMaker.create(dev, polling_period=self.polling_period)
                 self.devices[device_name] = device
                 
                 self.connect_device_signals(device)
@@ -116,12 +116,11 @@ class Laser_Data(Monitoring_Interface):
         event.accept()
 
 
-
 if __name__ == "__main__":
 
     appli = QApplication(sys.argv)
     appli.setStyleSheet(qdarkstyle.load_stylesheet(qt_api='pyqt6'))
-    laser_data = Laser_Data(polling_period=1, verbose=False, filename='./Data_Saver/my_laser_data.h5')
+    laser_data = Laser_Data(polling_period=1, verbose=False, filename='laser_data.h5', root_path='./Data')
     laser_data.load_config()
     laser_data.create_devices()
     laser_data.configure_h5File()
