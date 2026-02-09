@@ -10,6 +10,7 @@ from diagServer.diagServer import diagServer
 from Config.Config_RW import readConfig
 from Data_Saver.Data_Saver import DataSaver
 from Data_Saver.Data_Scheduler import DataSaveScheduler
+import pathlib
 
 class Laser_Data(Monitoring_Interface):
     signalLaserDataDict = QtCore.pyqtSignal(object)
@@ -26,6 +27,7 @@ class Laser_Data(Monitoring_Interface):
         self.polling_period = polling_period
         self._buffer_size = buffer_size
 
+        self.data_saver = DataSaver(flush_interval=self.data_flush_period)
         self.serv = diagServer(parent=self, data={"state": "starting..."}, name='LaserData') # init the server
         self.serv.start()  # start the server thread
 
@@ -35,9 +37,9 @@ class Laser_Data(Monitoring_Interface):
         tango_host = tango.ApiUtil.get_env_var("TANGO_HOST")
         print(f'Tango host: {tango_host}')
         print(f'Tango version: {tango.__version__}')
-
-        self.data_saver = DataSaver(filename=filename, root_path=root_path, flush_interval=data_flush_period)
-        self.scheduler = DataSaveScheduler(self.data_saver.on_data_event)
+        self.root_path = root_path
+        self.filename = filename
+        self.data_flush_period = data_flush_period
 
         self.connect_button_signals()
 
@@ -54,10 +56,10 @@ class Laser_Data(Monitoring_Interface):
             try:
                 # Dictionary of device objects
                 device_name = dev['name']
-                device = DeviceMaker.create(dev, polling_period=dev['polling period'])
-                self.scheduler.register_device(device_name, saving_period=dev['saving period'])
+                device = DeviceMaker.create(dev, polling_period=dev['polling period'],
+                                            saving_period=dev['saving period'])
+
                 self.devices[device_name] = device
-                
                 self.connect_device_signals(device)
                 self.add_graph(device)
                 self.add_stretch()
@@ -66,8 +68,7 @@ class Laser_Data(Monitoring_Interface):
                 print(e)
 
     def configure_h5File(self):
-         self.data_saver.start(self.devices)
-         
+        self.data_saver.start(self.devices, filename=self.filename, root_path=self.root_path)
 
     def connect_device_signals(self, device):
         """Connect device signals to slots"""
@@ -79,11 +80,14 @@ class Laser_Data(Monitoring_Interface):
     def connect_button_signals(self):
         self.start_request.connect(self._on_start_request)
         self.stop_request.connect(self._on_stop_request)
+        self.update_from_interface.connect(self._on_update_interface)
 
 
     def start_all_devices(self):
         """Start monitoring all devices"""
-        for device in self.devices.values():
+
+        for device_name, device in self.devices.items():
+            self.scheduler.register_device(device_name, saving_period=device.saving_period)
             device.start_device()
             print(f'Starting devices')
 
@@ -120,7 +124,10 @@ class Laser_Data(Monitoring_Interface):
     @pyqtSlot()
     def _on_start_request(self):
         try:
+
+            self.scheduler = DataSaveScheduler(self.data_saver.on_data_event)
             self.start_all_devices()
+            self.configure_h5File()
             self.update_to_running()
         except Exception as e:
             print(f'Exception {e} starting devices')
@@ -129,10 +136,15 @@ class Laser_Data(Monitoring_Interface):
         try:
             self.stop_all_devices()
             self.update_to_stopped()
+            self.data_saver.stop()
         except Exception as e:
             print(f'Exception {e} stopping devices')
 
-
+    def _on_update_interface(self):
+        self.root_path = pathlib.Path(self.root_path_input.text())
+        self.filename = self.file_name_input.text()
+        print(f'New root path: {pathlib.Path(self.root_path_input.text())}')
+        print(f'New file name: {self.file_name_input.text()}')
 
     @pyqtSlot(str, str)
     def _on_device_error(self, device_id: str, error: str):
@@ -152,12 +164,13 @@ if __name__ == "__main__":
 
     appli = QApplication(sys.argv)
     appli.setStyleSheet(qdarkstyle.load_stylesheet(qt_api='pyqt6'))
-    laser_data = Laser_Data(polling_period=1, verbose=False, filename='laser_data.h5',
-                            root_path='./Data', config_file="./Config/dummy_config.json",
+    laser_data = Laser_Data(polling_period=1, verbose=False, filename='new_laser_data.h5',
+                            root_path='C:/Users/APPLI/Python/Older versions/laser-monitoring/Data',
+                            config_file="./Config/dummy_config.json",
                             data_flush_period=5)
     laser_data.load_config()
     laser_data.create_devices()
-    laser_data.configure_h5File()
+    #laser_data.configure_h5File()
     laser_data.show()
     appli.exec_()
 

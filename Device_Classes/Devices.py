@@ -28,7 +28,7 @@ class Device(QObject):
     Base class for all devices
     """
 
-    def __init__(self, definition: dict, polling_period: float):
+    def __init__(self, definition: dict, polling_period: float, saving_period: float):
         super().__init__()
         self.name = definition['name']
         self.address = definition['address']
@@ -37,6 +37,7 @@ class Device(QObject):
         print(f'Device is virtual: {self.isVirtual is True}')
         self.thread = QThread()
         self.polling_period = polling_period
+        self.saving_period = saving_period
 
 
     def _start_thread(self):
@@ -72,8 +73,8 @@ class Device(QObject):
 
 
 class DummyDevice(Device):
-    def __init__(self, definition: dict, polling_period: float):
-        super().__init__(definition, polling_period)
+    def __init__(self, definition: dict, polling_period: float, saving_period: float):
+        super().__init__(definition, polling_period, saving_period)
         self.labels = {'x_label': 'Time',
                        'y_label': 'Signal', 'x_units': 's', 'y_units': 'a.u.'}
         self.graph_type = 'rolling_1d'
@@ -82,8 +83,8 @@ class DummyDevice(Device):
 
 
 class DummyDevice1D(Device):
-    def __init__(self, definition: dict, polling_period: float):
-        super().__init__(definition, polling_period)
+    def __init__(self, definition: dict, polling_period: float, saving_period: float):
+        super().__init__(definition, polling_period, saving_period)
         self.labels = {'x_label': 'Wavelength',
                        'y_label': 'Signal', 'x_units': 'nm', 'y_units': 'a.u.'}
         self.graph_type = 'static_1d'
@@ -93,8 +94,8 @@ class DummyDevice1D(Device):
 
 
 class DummyDevice2D(Device):
-    def __init__(self, definition: dict, polling_period: float):
-        super().__init__(definition, polling_period)
+    def __init__(self, definition: dict, polling_period: float, saving_period: float):
+        super().__init__(definition, polling_period, saving_period)
         self.labels = {'x_label': 'x',
                        'y_label': 'y', 'x_units': 'px', 'y_units': 'px'}
         self.graph_type = 'density_2d'
@@ -102,8 +103,8 @@ class DummyDevice2D(Device):
         self._start_thread()
 
 class Spectrometer(Device):
-    def __init__(self, definition: dict, polling_period: float):
-        super().__init__(definition, polling_period)
+    def __init__(self, definition: dict, polling_period: float, saving_period: float):
+        super().__init__(definition, polling_period, saving_period)
         self.setup()
         self.labels = {'x_label': 'lambda',
                        'y_label': 'Amplitude', 'x_units': 'nm', 'y_units': 'a.u.'}
@@ -114,8 +115,8 @@ class Spectrometer(Device):
 
 
 class BeamAnalyzer(Device):
-    def __init__(self, definition: dict, polling_period: float):
-        super().__init__(definition, polling_period)
+    def __init__(self, definition: dict, polling_period: float, saving_period: float):
+        super().__init__(definition, polling_period, saving_period)
         self.properties = {}
         self.setup()
         self.attrs = ('Centroid X', 'Centroid Y', 'Max Intensity',
@@ -124,8 +125,8 @@ class BeamAnalyzer(Device):
         self._start_thread()
 
 class EnergyMeter(Device):
-    def __init__(self, definition: dict, polling_period: float):
-        super().__init__(definition, polling_period)
+    def __init__(self, definition: dict, polling_period: float, saving_period: float):
+        super().__init__(definition, polling_period, saving_period)
         self.setup()
         self.labels = {'x_label': 'time', 'y_label': 'Energy', 'x_units': '(s)', 'y_units': '(mJ)'}
         self.attrs = {'x': None, 'y': 'energy_1'}
@@ -144,14 +145,14 @@ class DeviceMaker:
     }
 
     @classmethod
-    def create(cls, definition: dict, polling_period: float) -> Device:
+    def create(cls, definition: dict, polling_period: float, saving_period: float) -> Device:
         device_type = definition.get('type')
         device_class = cls._device_types.get(device_type)
 
         if not device_class:
             raise ValueError(f"Unknown device type: {device_type}")
 
-        return device_class(definition, polling_period)
+        return device_class(definition, polling_period, saving_period)
 
 
 if __name__ == "__main__":

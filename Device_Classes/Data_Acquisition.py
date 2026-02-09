@@ -113,7 +113,6 @@ class TangoDevice(Data_Acquisition):
             data[key] = self.parent.device_proxy.read_attribute(attribute).value
         self.data_received.emit(self.device_id, data)
 
-
         # Schedule next call
         QTimer.singleShot(self.period_ms, self._generate_data)
 

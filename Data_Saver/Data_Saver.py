@@ -13,10 +13,8 @@ class DataSaver(QObject):
     buffer_warning = pyqtSignal(int)  # Emitted when buffer fills up
     data_saved = pyqtSignal(int)      # Emitted after batch write (count)
     
-    def __init__(self, filename, root_path: str = './Data',
-                 batch_size=2048, max_buffer=20480, flush_interval=30):
+    def __init__(self, batch_size=2048, max_buffer=20480, flush_interval=30):
         super().__init__()
-        self.filename = filename
         self.batch_size = batch_size
         self.max_buffer = max_buffer
         self.flush_interval = flush_interval  # seconds
@@ -33,24 +31,23 @@ class DataSaver(QObject):
         self.dropped_count = 0
         
         # HDF5 file and table
-        self.h5_file = H5Builder(filename, root_path)
+        self.h5_file = H5Builder()
         
 
-    def start(self, devices: dict):
+    def start(self, devices: dict, filename: str, root_path: str):
         """Initialize HDF5 file and start writer thread"""
         if self.running:
             return
             
         # Configure HDF5 file
-        self.h5_file.create_file(devices=devices)
-
+        self.h5_file.create_file(devices=devices, file_name=filename, root_path=root_path)
 
         # Start writer thread
         self.running = True
         self.writer_thread = threading.Thread(target=self._write_loop, daemon=True)
         self.writer_thread.start()
         
-        print(f"Data saver started: {self.filename}")
+        print(f"Data saver started: {filename}")
 
     def stop(self):
         """Stop writer thread and close file"""

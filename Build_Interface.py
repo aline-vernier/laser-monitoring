@@ -7,7 +7,7 @@ Build Spectrometer Interface - GUI only
 """
 from PyQt6.QtWidgets import QApplication, QVBoxLayout, QWidget, QHBoxLayout, QGridLayout
 from PyQt6.QtWidgets import (QLabel, QMainWindow, QStatusBar, QComboBox,
-                             QCheckBox, QDoubleSpinBox,  QPushButton, QLineEdit)
+                             QCheckBox, QDoubleSpinBox,  QPushButton, QLineEdit, QFileDialog)
 import PyQt6.QtGui as QtGui
 from PyQt6.QtGui import QIcon, QAction
 from PyQt6.QtCore import pyqtSignal
@@ -26,6 +26,7 @@ sepa = os.sep
 class Monitoring_Interface(QMainWindow):
     start_request = pyqtSignal()
     stop_request = pyqtSignal()
+    update_from_interface = pyqtSignal()
 
     def __init__(self):
         super().__init__()
@@ -37,7 +38,6 @@ class Monitoring_Interface(QMainWindow):
         self.setup_button_actions()
         self.graphs = {}
         self.graph_widgets = {}
-
 
     def setup_interface(self):
         #####################################################################
@@ -110,13 +110,20 @@ class Monitoring_Interface(QMainWindow):
         grid_layout_saving_config.setHorizontalSpacing(5)
         grid_layout_saving_config.setVerticalSpacing(5)
         saving_settings = QLabel('Saving settings')
+        file_name_label = QLabel('File name:')
+        root_path_label = QLabel('Root path:')
         self.file_name_input = QLineEdit()
+        self.file_name_input.setText("laser_data.h5")
         self.root_path_input = QLineEdit()
-        self.root_path_input.setPlaceholderText("./Data")
+        self.root_path_input.setText("./Data")
+        self.root_path_browse_btn = QPushButton("Browse...")
 
         grid_layout_saving_config.addWidget(saving_settings, 0, 0)
-        grid_layout_saving_config.addWidget(self.file_name_input, 0, 1)
-        grid_layout_saving_config.addWidget(self.root_path_input, 0, 1)
+        grid_layout_saving_config.addWidget(file_name_label, 1, 0)
+        grid_layout_saving_config.addWidget(self.file_name_input, 1, 1)
+        grid_layout_saving_config.addWidget(root_path_label, 2, 0)
+        grid_layout_saving_config.addWidget(self.root_path_input, 2, 1)
+        grid_layout_saving_config.addWidget(self.root_path_browse_btn, 2, 2)
         self.vbox3.addLayout(grid_layout_saving_config)
         self.vbox3.addStretch(1)
 
@@ -136,6 +143,19 @@ class Monitoring_Interface(QMainWindow):
     def setup_button_actions(self):
         self.clear_graphs_ctl.clicked.connect(self.clear_graphs)
         self.start_stop_ctl.clicked.connect(self.start_stop)
+        self.root_path_browse_btn.clicked.connect(self.browse_root_path)
+        self.root_path_input.textChanged.connect(self.update_interface_values)
+        self.file_name_input.textChanged.connect(self.update_interface_values)
+
+
+
+
+    def browse_root_path(self):
+        directory = QFileDialog.getExistingDirectory(
+            self, "Select Root Directory"
+        )
+        if directory:
+            self.root_path_input.setText(directory)
 
     def open_widget(self, win):
         """ open new widget
@@ -187,10 +207,15 @@ class Monitoring_Interface(QMainWindow):
         else:
             print(f'Text: {self.start_stop_ctl.text()}')
 
+    def update_interface_values(self):
+        self.update_from_interface.emit()
+
     def update_to_running(self):
         self.start_stop_ctl.setText("Stop")
     def update_to_stopped(self):
         self.start_stop_ctl.setText("Start")
+
+
 
 
 if __name__ == "__main__":

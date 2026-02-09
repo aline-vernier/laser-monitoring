@@ -7,15 +7,16 @@ from Data_Saver.Nested_Dir import create_date_folders
 
 
 class H5Builder:
-    def __init__(self, filename: str, root_path: str = './Data'):
+    def __init__(self):
 
-        created_path = create_date_folders(root_path)
-        print(f'Created path: {created_path}')
-        self.file = created_path / filename
         self.lock = Lock()  # Thread safety for async operations
         self.defined_datasets = ['rolling_1d', 'static_1d']
 
-    def create_file(self, devices: dict[str, Any]):
+    def create_file(self, file_name: str, root_path: str, devices: dict[str, Any]):
+        created_path = create_date_folders(root_path)
+        print(f'Created path: {created_path}')
+        self.file = created_path / file_name
+
         """Initialize datasets for each device"""
         with h5py.File(self.file, 'a') as f:
             for device_id, device in devices.items():
@@ -61,7 +62,7 @@ class H5Builder:
                         f[dataset_name].attrs['device_name'] = device.name
                         f[dataset_name].attrs['graph_type'] = device.graph_type
 
-            print(f"Created datasets for {len(devices)} devices")
+            print(f"Success! Created datasets for {len(devices)} devices")
     def append_data(self, device_id: str, timestamp: float, value: float):
         """Append a single (timestamp, value) pair to a device's dataset"""
 
