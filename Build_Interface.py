@@ -9,8 +9,8 @@ from PyQt6.QtWidgets import QApplication, QVBoxLayout, QWidget, QHBoxLayout, QGr
 from PyQt6.QtWidgets import (QLabel, QMainWindow, QStatusBar, QComboBox,
                              QCheckBox, QDoubleSpinBox,  QPushButton, QLineEdit)
 import PyQt6.QtGui as QtGui
-from PyQt6.QtGui import QIcon, QFont, QAction
-from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QIcon, QAction
+from PyQt6.QtCore import pyqtSignal
 import sys
 import qdarkstyle
 import os
@@ -23,8 +23,10 @@ from SubMenus.WinOption import OPTION
 
 sepa = os.sep
 
-
 class Monitoring_Interface(QMainWindow):
+    start_request = pyqtSignal()
+    stop_request = pyqtSignal()
+
     def __init__(self):
         super().__init__()
         p = pathlib.Path(__file__)
@@ -35,7 +37,7 @@ class Monitoring_Interface(QMainWindow):
         self.setup_button_actions()
         self.graphs = {}
         self.graph_widgets = {}
-        
+
 
     def setup_interface(self):
         #####################################################################
@@ -44,7 +46,6 @@ class Monitoring_Interface(QMainWindow):
         self.setWindowTitle('Laser Monitoring')
         self.setWindowIcon(QIcon(self.icon + "/LOA.png"))
         self.setStyleSheet(qdarkstyle.load_stylesheet(qt_api='pyqt6'))
-        #self.setGeometry(100, 30, 1200, 500)
 
         self.toolBar = self.addToolBar('tools')
         self.toolBar.setMovable(False)
@@ -105,17 +106,36 @@ class Monitoring_Interface(QMainWindow):
         ######################
         #    Graph controls
         ######################
+        grid_layout_saving_config = QGridLayout()
+        grid_layout_saving_config.setHorizontalSpacing(5)
+        grid_layout_saving_config.setVerticalSpacing(5)
+        saving_settings = QLabel('Saving settings')
+        self.file_name_input = QLineEdit()
+        self.root_path_input = QLineEdit()
+        self.root_path_input.setPlaceholderText("./Data")
+
+        grid_layout_saving_config.addWidget(saving_settings, 0, 0)
+        grid_layout_saving_config.addWidget(self.file_name_input, 0, 1)
+        grid_layout_saving_config.addWidget(self.root_path_input, 0, 1)
+        self.vbox3.addLayout(grid_layout_saving_config)
+        self.vbox3.addStretch(1)
 
         grid_layout_graph_functions = QGridLayout()
+        grid_layout_graph_functions.setHorizontalSpacing(5)
+        grid_layout_graph_functions.setVerticalSpacing(5)
         graph_settings = QLabel('Graph settings')
         self.clear_graphs_ctl = QPushButton(text="Clear Graphs")
+        self.start_stop_ctl = QPushButton(text="Start")
+
         grid_layout_graph_functions.addWidget(graph_settings, 0, 0)
         grid_layout_graph_functions.addWidget(self.clear_graphs_ctl, 1, 0)
+        grid_layout_graph_functions.addWidget(self.start_stop_ctl, 2, 0)
         self.vbox3.addLayout(grid_layout_graph_functions)
         self.vbox3.addStretch(1)
 
     def setup_button_actions(self):
         self.clear_graphs_ctl.clicked.connect(self.clear_graphs)
+        self.start_stop_ctl.clicked.connect(self.start_stop)
 
     def open_widget(self, win):
         """ open new widget
@@ -157,11 +177,25 @@ class Monitoring_Interface(QMainWindow):
         for device_id, graph in self.graphs.items():
             graph.clear_graph()
 
+    def start_stop(self):
+        if self.start_stop_ctl.text() == "Start":
+            self.start_request.emit()
+            print(f'Start !')
+        elif self.start_stop_ctl.text() == "Stop":
+            self.stop_request.emit()
+            print(f'Stop !')
+        else:
+            print(f'Text: {self.start_stop_ctl.text()}')
+
+    def update_to_running(self):
+        self.start_stop_ctl.setText("Stop")
+    def update_to_stopped(self):
+        self.start_stop_ctl.setText("Start")
 
 
 if __name__ == "__main__":
 
     appli = QApplication(sys.argv)   
-    e= Monitoring_Interface()
+    e = Monitoring_Interface()
     e.show()
     appli.exec_()

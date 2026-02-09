@@ -1,6 +1,6 @@
 import tango
 from PyQt6.QtWidgets import QApplication
-from PyQt6.QtCore import pyqtSlot, QTimer
+from PyQt6.QtCore import pyqtSlot
 from PyQt6 import QtCore
 import sys
 import qdarkstyle
@@ -39,6 +39,8 @@ class Laser_Data(Monitoring_Interface):
         self.data_saver = DataSaver(filename=filename, root_path=root_path, flush_interval=data_flush_period)
         self.scheduler = DataSaveScheduler(self.data_saver.on_data_event)
 
+        self.connect_button_signals()
+
     def load_config(self):  # To load from JSON
 
         # Read configuration back from file
@@ -74,12 +76,17 @@ class Laser_Data(Monitoring_Interface):
         self.data_saver.buffer_warning.connect(lambda size: print(f"WARNING: Buffer filling up! Size: {size}"))
         self.data_saver.data_saved.connect(lambda count: print(f"Saved batch of {count} points"))
 
+    def connect_button_signals(self):
+        self.start_request.connect(self._on_start_request)
+        self.stop_request.connect(self._on_stop_request)
+
+
     def start_all_devices(self):
         """Start monitoring all devices"""
         for device in self.devices.values():
             device.start_device()
+            print(f'Starting devices')
 
-    
     def stop_all_devices(self):
         """Stop monitoring all devices"""
         for device in self.devices.values():
@@ -110,6 +117,23 @@ class Laser_Data(Monitoring_Interface):
         else:
             pass
 
+    @pyqtSlot()
+    def _on_start_request(self):
+        try:
+            self.start_all_devices()
+            self.update_to_running()
+        except Exception as e:
+            print(f'Exception {e} starting devices')
+
+    def _on_stop_request(self):
+        try:
+            self.stop_all_devices()
+            self.update_to_stopped()
+        except Exception as e:
+            print(f'Exception {e} stopping devices')
+
+
+
     @pyqtSlot(str, str)
     def _on_device_error(self, device_id: str, error: str):
         """Handle errors from any device"""
@@ -134,7 +158,6 @@ if __name__ == "__main__":
     laser_data.load_config()
     laser_data.create_devices()
     laser_data.configure_h5File()
-    laser_data.start_all_devices()
     laser_data.show()
     appli.exec_()
 

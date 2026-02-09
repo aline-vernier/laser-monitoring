@@ -15,7 +15,6 @@ from PyQt6.QtGui import QIcon
 import sys
 import os
 import numpy as np
-import socket as _socket
 import pathlib
 import time
 import zmq
