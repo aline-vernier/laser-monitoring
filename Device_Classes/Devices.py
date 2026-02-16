@@ -124,6 +124,16 @@ class BeamAnalyzer(Device):
         self.graph_type = None
         self._start_thread()
 
+class BeamProfile(Device):
+    # Vérifier nom de l'attribut sur place, pas forcément 'image'...
+    def __init__(self, definition: dict, polling_period: float, saving_period: float):
+        super().__init__(definition, polling_period, saving_period)
+        self.properties = {}
+        self.setup()
+        self.attrs = ('image')
+        self.graph_type = 'density_2d'
+        self._start_thread()
+
 class EnergyMeter(Device):
     def __init__(self, definition: dict, polling_period: float, saving_period: float):
         super().__init__(definition, polling_period, saving_period)

@@ -170,7 +170,6 @@ if __name__ == "__main__":
                             data_flush_period=5)
     laser_data.load_config()
     laser_data.create_devices()
-    #laser_data.configure_h5File()
     laser_data.show()
     appli.exec_()
 

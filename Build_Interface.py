@@ -127,6 +127,8 @@ class Monitoring_Interface(QMainWindow):
         self.vbox3.addLayout(grid_layout_saving_config)
         self.vbox3.addStretch(1)
 
+
+
         grid_layout_graph_functions = QGridLayout()
         grid_layout_graph_functions.setHorizontalSpacing(5)
         grid_layout_graph_functions.setVerticalSpacing(5)

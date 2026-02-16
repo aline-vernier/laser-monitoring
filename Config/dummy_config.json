@@ -14,5 +14,13 @@
         "is virtual" : true,
         "saving period": 1,
         "polling period": 0.1
+    },
+        "device_3": {
+        "name": "Beam profiler",
+        "address": "",
+        "type": "dummy device 2D",
+        "is virtual" : true,
+        "saving period": 1,
+        "polling period": 0.1
     }
 }
