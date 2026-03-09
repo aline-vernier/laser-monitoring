@@ -20,7 +20,7 @@
         "address": "",
         "type": "dummy device 2D",
         "is virtual" : true,
-        "saving period": 1,
+        "saving period": 20,
         "polling period": 0.1
     }
 }

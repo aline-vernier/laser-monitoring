@@ -107,12 +107,15 @@ class Laser_Data(Monitoring_Interface):
         self.update_graph(device, data)
         self.signalLaserDataDict.emit(dict(device_name=device_name, data=data)) # Signal for DiagServ
 
-        if self.devices[device_name].graph_type in ['rolling_1d', 'static_1d']:
+        if self.devices[device_name].graph_type in ['rolling_1d', 'static_1d', 'density_2d']:
             if self.devices[device_name].graph_type == 'rolling_1d':
                 _data = [data['x'], data['y']]
 
             elif self.devices[device_name].graph_type == 'static_1d':
                 _data = data['y']
+
+            elif self.devices[device_name].graph_type == 'density_2d':
+                _data = data['image']
             self.scheduler.on_data_received(device_name, _data)
 
 

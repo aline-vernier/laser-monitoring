@@ -10,7 +10,7 @@ class H5Builder:
     def __init__(self):
 
         self.lock = Lock()  # Thread safety for async operations
-        self.defined_datasets = ['rolling_1d', 'static_1d']
+        self.defined_datasets = ['rolling_1d', 'static_1d', 'density_2d']
 
     def create_file(self, file_name: str, root_path: str, devices: dict[str, Any]):
         created_path = create_date_folders(root_path)
@@ -45,6 +45,18 @@ class H5Builder:
                             "compression": 'gzip',
                             "compression_opts": 4
                         }
+                    elif device.graph_type == 'density_2d':
+                        height = 808
+                        width = 608
+                        _format = {
+                            "name": dataset_name,
+                            "shape": (0, height, width),  # Start with 0 images
+                            "maxshape": (None, height, width),  # Allow unlimited images
+                            "dtype": 'i2',
+                            "chunks": (1, height, width),  # One image per chunk
+                            "compression": 'gzip',
+                            "compression_opts": 4
+                        }
 
                     if dataset_name not in f:
                         # Create dataset using _format dictionary
@@ -69,22 +81,31 @@ class H5Builder:
         with self.lock:  # Thread-safe for async operations
             with h5py.File(self.file, 'a') as f:
                 dataset_name = f'devices/{device_id}'
-                
+
                 if dataset_name not in f:
                     raise ValueError(f"Dataset {dataset_name} not found")
-                
+
                 dataset = f[dataset_name]
-                current_size = dataset.shape[0]
+                graph_type = dataset.attrs.get('graph_type')
+                print(f'Graph type: {graph_type}')
+                if graph_type == 'density_2d':
+                    print(f'Graph is 2D')
+                    # Resize dataset and add new image
+                    dataset.resize((dataset.shape[0] + 1, *dataset.shape[1:]))
+                    dataset[-1] = data  # Add image to the last position
+                else :
+                    current_size = dataset.shape[0]
                 
                 # Resize and append
-                dataset.resize(current_size + 1, axis=0)
-                dataset[current_size] = [timestamp, value]
+                    dataset.resize(current_size + 1, axis=0)
+                    dataset[current_size] = [timestamp, value]
 
     def append_batch(self, device_id: str, data: np.ndarray):
         """Append multiple (timestamp, value) pairs at once
 
         """
         t_0 = time.time()
+
         with self.lock:
             with h5py.File(self.file, 'a') as f:
                 dataset_name = f'devices/{device_id}'
@@ -94,16 +115,20 @@ class H5Builder:
                     raise ValueError(f"Dataset {dataset_name} not found")
                 
                 dataset = f[dataset_name]
+                graph_type = dataset.attrs.get('graph_type')
+
                 current_size = dataset.shape[0]
-                print(f'Current size: {dataset.shape}')
-                
-                # Resize and append
-
-                #dataset.resize(current_size + len(data), axis=0)
-                dataset.resize(current_size + 1, axis=0)
-
                 print(f'Device id: {device_id}, length of data: {len(data)}')
-                dataset[current_size:] = data
+                if graph_type == 'density_2d':
+                    print(f'Graph is 2D')
+                    # Resize dataset and add new image
+                    dataset.resize((dataset.shape[0] + 1, *dataset.shape[1:]))
+                    dataset[-1] = data  # Add image to the last position
+                else:
+
+                    # Resize and append
+                    dataset.resize(current_size + 1, axis=0)
+                    dataset[current_size:] = data
         print(f'saving batch took {time.time()-t_0}s')
     
     def get_device_data(self, device_id: str) -> np.ndarray:

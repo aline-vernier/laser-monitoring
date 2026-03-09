@@ -107,6 +107,12 @@ class TangoDevice(Data_Acquisition):
     def setup(self):
         pass
 
+    @property
+    def shape(self):
+        data = {}
+        for key, attribute in self.parent.attrs.items():
+            data[key] = self.parent.device_proxy.read_attribute(attribute).value
+
     def _generate_data(self):
         data = {}
         for key, attribute in self.parent.attrs.items():
