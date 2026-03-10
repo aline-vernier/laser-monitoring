@@ -15,7 +15,7 @@ import pathlib
 class Laser_Data(Monitoring_Interface):
     signalLaserDataDict = QtCore.pyqtSignal(object)
 
-    def __init__(self, polling_period: float, buffer_size: int = 1000, config_file: str = "./Config/dummy_config.json",
+    def __init__(self, polling_period: float, buffer_size: int = 1000, config_file: str = "./Config/tangoVM_config.json",
                  verbose: bool = False, filename: str = 'laser_data.h5', root_path: str = './Data',
                  data_flush_period: int = 30):
         super().__init__()
@@ -169,7 +169,7 @@ if __name__ == "__main__":
     appli.setStyleSheet(qdarkstyle.load_stylesheet(qt_api='pyqt6'))
     laser_data = Laser_Data(polling_period=1, verbose=False, filename='new_laser_data.h5',
                             root_path='C:/Users/APPLI/Python/Older versions/laser-monitoring/Data',
-                            config_file="./Config/dummy_config.json",
+                            config_file="./Config/tangoVM_config.json",
                             data_flush_period=5)
     laser_data.load_config()
     laser_data.create_devices()

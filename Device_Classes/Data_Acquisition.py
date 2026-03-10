@@ -108,10 +108,12 @@ class TangoDevice(Data_Acquisition):
         pass
 
     @property
-    def shape(self):
-        data = {}
+    def data_shapes(self):
+        _data_shape = dict({})
         for key, attribute in self.parent.attrs.items():
-            data[key] = self.parent.device_proxy.read_attribute(attribute).value
+            _data_shape[key]=np.shape(self.parent.device_proxy.read_attribute(attribute).value)
+        print (f'data shape : {_data_shape}')
+        return _data_shape
 
     def _generate_data(self):
         data = {}
