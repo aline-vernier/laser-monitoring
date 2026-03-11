@@ -78,6 +78,7 @@ class DummyDevice(Device):
         self.graph_type = 'rolling_1d'
 
         self._start_thread()
+        print(f'Dummy device 0D shape : {self.shape}')
 
     @property
     def shape(self):
@@ -92,6 +93,10 @@ class DummyDevice1D(Device):
         self.graph_type = 'static_1d'
 
         self._start_thread()
+        print (f'Dummy device 1D shape : {self.shape}')
+    @property
+    def shape(self):
+        return self.worker.data_shapes[self.graph_type]
 
 
 
@@ -104,51 +109,41 @@ class DummyDevice2D(Device):
 
         self._start_thread()
 
+
+    @property
+    def shape(self):
+        return self.worker.data_shapes[self.graph_type]
+
 class Spectrometer(Device):
     def __init__(self, definition: dict, polling_period: float, saving_period: float):
         super().__init__(definition, polling_period, saving_period)
 
-        self.labels = {'x_label': 'lambda',
-                       'y_label': 'Amplitude', 'x_units': 'nm', 'y_units': 'a.u.'}
+        self.labels = {'x_label': 'x',
+                       'y_label': 'y', 'x_units': 'px', 'y_units': 'px'}
         self.attrs = {'x': 'lambda', 'y': 'intensity'}
         self.graph_type = 'static_1d'
         self.setup()
 
         self._start_thread()
-        print(f'spectrometer data size: {self.shape}')
+
 
     @property
     def shape(self):
-        print(f'Worker data shapes: {self.worker.data_shapes}')
         return self.worker.data_shapes['y']
 
-
-class BeamAnalyzer(Device):
-    def __init__(self, definition: dict, polling_period: float, saving_period: float):
-        super().__init__(definition, polling_period, saving_period)
-        self.properties = {}
-
-        self.attrs = ('Centroid X', 'Centroid Y', 'Max Intensity',
-                      'Peak X', 'Peak Y', 'Variance X', 'Variance Y')
-        self.graph_type = None
-        self.setup()
-        self._start_thread()
-
-    @property
-    def shape(self):
-        return None
 
 class BeamProfile(Device):
     # Vérifier nom de l'attribut sur place, pas forcément 'image'...
     def __init__(self, definition: dict, polling_period: float, saving_period: float):
         super().__init__(definition, polling_period, saving_period)
         self.properties = {}
+        self.labels = {'x_label': 'lambda',
+                       'y_label': 'Amplitude', 'x_units': 'nm', 'y_units': 'a.u.'}
 
-        self.attrs = ('image')
+        self.attrs = {'image': 'image'}
         self.graph_type = 'density_2d'
         self.setup()
         self._start_thread()
-        print(f'Beam profile data size: {self.shape}')
 
     @property
     def shape(self):
@@ -163,7 +158,6 @@ class EnergyMeter(Device):
         self.graph_type = 'rolling_1d'
         self.setup()
         self._start_thread()
-        print(f'Energymeter data size: {self.shape}')
 
     @property
     def shape(self):
@@ -173,7 +167,7 @@ class EnergyMeter(Device):
 class DeviceMaker:
     _device_types = {
         'spectrometer': Spectrometer,
-        'beam analyzer': BeamAnalyzer,
+        'beam profile': BeamProfile,
         'energy meter': EnergyMeter,
         'dummy device': DummyDevice,
         'dummy device 1D': DummyDevice1D,

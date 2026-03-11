@@ -109,7 +109,8 @@ class Laser_Data(Monitoring_Interface):
 
         if self.devices[device_name].graph_type in ['rolling_1d', 'static_1d', 'density_2d']:
             if self.devices[device_name].graph_type == 'rolling_1d':
-                _data = [data['x'], data['y']]
+                #_data = [data['x'], data['y']]
+                _data = data['y']
 
             elif self.devices[device_name].graph_type == 'static_1d':
                 _data = data['y']
@@ -169,7 +170,7 @@ if __name__ == "__main__":
     appli.setStyleSheet(qdarkstyle.load_stylesheet(qt_api='pyqt6'))
     laser_data = Laser_Data(polling_period=1, verbose=False, filename='new_laser_data.h5',
                             root_path='C:/Users/APPLI/Python/Older versions/laser-monitoring/Data',
-                            config_file="./Config/tangoVM_config.json",
+                            config_file="./Config/dummy_config.json",
                             data_flush_period=5)
     laser_data.load_config()
     laser_data.create_devices()

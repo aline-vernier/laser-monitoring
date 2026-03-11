@@ -25,14 +25,7 @@ class Data_Acquisition(QObject):
             self.polling_period = 2
         self._t0 = None
 
-    def shape(self):
-        """Return the shape of the data produced by this device"""
-        self.start()
-        data = self.data_generator()
-        print(f'data: {data}')
-        shape = data['shape']
-        self.stop()
-        return shape
+
           
 
     def start(self):
@@ -112,7 +105,7 @@ class TangoDevice(Data_Acquisition):
         _data_shape = dict({})
         for key, attribute in self.parent.attrs.items():
             _data_shape[key]=np.shape(self.parent.device_proxy.read_attribute(attribute).value)
-        print (f'data shape : {_data_shape}')
+            print (f'key : {key}, attribute: {attribute}, attribute: {self.parent.device_proxy.read_attribute(attribute)}')
         return _data_shape
 
     def _generate_data(self):

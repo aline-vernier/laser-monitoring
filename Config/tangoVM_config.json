@@ -6,5 +6,14 @@
         "is virtual" : false,
         "saving period": 10,
         "polling period": 1
+    },
+        "device_2": {
+            "name": "OPCPA Camera",
+            "address": "FE_CAMERA_1/LimaDetector/1",
+            "type": "beam profile",
+            "is virtual": false,
+            "saving period": 10,
+            "polling period": 1
     }
+
 }

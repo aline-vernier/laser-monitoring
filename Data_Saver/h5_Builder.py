@@ -21,42 +21,38 @@ class H5Builder:
         with h5py.File(self.file, 'a') as f:
             for device_id, device in devices.items():
                 print(f'device id: {device_id}, device graph type: {device.graph_type}')
+                print(f'dim_y: {device.shape[0]})')
+                dim_y = device.shape[0]
+                try:
+                    dim_x = device.shape[1]
+                except:
+                    dim_x = 0
+                print(f', dim_x: {dim_x}')
 
                 if device.graph_type in self.defined_datasets:
                     dataset_name = f'devices/{device_id}'
 
-                    if device.graph_type == 'rolling_1d':
+                    if device.graph_type == 'density_2d':
                         _format = {
                             "name": dataset_name,
-                            "shape": (0, 2),
-                            "maxshape": (None, 2),
-                            "dtype": 'f4',
-                            "chunks": (1000, 2),
-                            "compression": 'gzip',
-                            "compression_opts": 4
-                        }
-                    elif device.graph_type == 'static_1d':
-                        _format = {
-                            "name": dataset_name,
-                            "shape": (0, 2048),
-                            "maxshape": (None, 2048),
-                            "dtype": 'f4',
-                            "chunks": (1000, 2048),  # Fixed chunk size too
-                            "compression": 'gzip',
-                            "compression_opts": 4
-                        }
-                    elif device.graph_type == 'density_2d':
-                        height = 808
-                        width = 608
-                        _format = {
-                            "name": dataset_name,
-                            "shape": (0, height, width),  # Start with 0 images
-                            "maxshape": (None, height, width),  # Allow unlimited images
+                            "shape": (0, dim_y, dim_x),  # Start with 0 images
+                            "maxshape": (None, dim_y, dim_x),  # Allow unlimited images
                             "dtype": 'i2',
-                            "chunks": (1, height, width),  # One image per chunk
+                            "chunks": (1, dim_y, dim_x),  # One image per chunk
                             "compression": 'gzip',
                             "compression_opts": 4
                         }
+                    else :
+                        _format = {
+                            "name": dataset_name,
+                            "shape": (dim_x, dim_y),
+                            "maxshape": (None, dim_y),
+                            "dtype": 'f4',
+                            "chunks": (1000, dim_y),
+                            "compression": 'gzip',
+                            "compression_opts": 4
+                        }
+
 
                     if dataset_name not in f:
                         # Create dataset using _format dictionary
@@ -89,7 +85,6 @@ class H5Builder:
                 graph_type = dataset.attrs.get('graph_type')
                 print(f'Graph type: {graph_type}')
                 if graph_type == 'density_2d':
-                    print(f'Graph is 2D')
                     # Resize dataset and add new image
                     dataset.resize((dataset.shape[0] + 1, *dataset.shape[1:]))
                     dataset[-1] = data  # Add image to the last position
@@ -118,14 +113,12 @@ class H5Builder:
                 graph_type = dataset.attrs.get('graph_type')
 
                 current_size = dataset.shape[0]
-                print(f'Device id: {device_id}, length of data: {len(data)}')
                 if graph_type == 'density_2d':
-                    print(f'Graph is 2D')
                     # Resize dataset and add new image
                     dataset.resize((dataset.shape[0] + 1, *dataset.shape[1:]))
-                    dataset[-1] = data  # Add image to the last position
+                    # Add image to the last position
+                    dataset[-1] = data
                 else:
-
                     # Resize and append
                     dataset.resize(current_size + 1, axis=0)
                     dataset[current_size:] = data
