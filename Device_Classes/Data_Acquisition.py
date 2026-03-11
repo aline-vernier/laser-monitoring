@@ -7,7 +7,7 @@ from PIL import Image
 class Data_Acquisition(QObject):
     """Base class that runs in a separate thread"""
     # Signal must be a class attribute
-    data_received = pyqtSignal(str, dict)  # (device_id, data)
+    data_received = pyqtSignal(str, dict, float)  # (device_id, data, timestamp)
     error_occurred = pyqtSignal(str, str)  # (device_id, error_message)
 
     def __init__(self, parent=None):
@@ -53,9 +53,9 @@ class VirtualDevice(Data_Acquisition):
         pass
 
     def _generate_data(self):
-        
         data = self.data_generator()
-        self.data_received.emit(self.device_id, data)
+        timestamp = (datetime.now()).timestamp()
+        self.data_received.emit(self.device_id, data, timestamp)
         
         # Schedule next call
         QTimer.singleShot(self.period_ms, self._generate_data)
@@ -110,9 +110,10 @@ class TangoDevice(Data_Acquisition):
 
     def _generate_data(self):
         data = {}
+        timestamp = (datetime.now()).timestamp()
         for key, attribute in self.parent.attrs.items():
             data[key] = self.parent.device_proxy.read_attribute(attribute).value
-        self.data_received.emit(self.device_id, data)
+        self.data_received.emit(self.device_id, data, timestamp)
 
         # Schedule next call
         QTimer.singleShot(self.period_ms, self._generate_data)
@@ -125,7 +126,8 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
 
     virtual_device = VirtualDevice()
-    virtual_device.data_received.connect(lambda device_id, data: print(f"Data from {device_id}: {data}"))
+    virtual_device.data_received.connect(lambda device_id, data, timestamp:
+                                         print(f"Data from {device_id}: {data}, timestamp: {timestamp}"))
     virtual_device.start()
     print(f"From Data Acquisition ; Data shape: {virtual_device.shape()}")
     virtual_device.stop()

@@ -8,7 +8,6 @@ from Data_Saver.Nested_Dir import create_date_folders
 
 class H5Builder:
     def __init__(self):
-
         self.lock = Lock()  # Thread safety for async operations
         self.defined_datasets = ['rolling_1d', 'static_1d', 'density_2d']
 
@@ -20,14 +19,11 @@ class H5Builder:
         """Initialize datasets for each device"""
         with h5py.File(self.file, 'a') as f:
             for device_id, device in devices.items():
-                print(f'device id: {device_id}, device graph type: {device.graph_type}')
-                print(f'dim_y: {device.shape[0]})')
                 dim_y = device.shape[0]
                 try:
                     dim_x = device.shape[1]
                 except:
                     dim_x = 0
-                print(f', dim_x: {dim_x}')
 
                 if device.graph_type in self.defined_datasets:
                     dataset_name = f'devices/{device_id}'

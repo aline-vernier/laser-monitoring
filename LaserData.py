@@ -100,8 +100,8 @@ class Laser_Data(Monitoring_Interface):
     #                    SIGNAL HANDLERS (Slots)
     #######################################################################
 
-    @pyqtSlot(str, dict)
-    def _on_device_data(self, device_name: str, data: dict):
+    @pyqtSlot(str, dict, float)
+    def _on_device_data(self, device_name: str, data: dict, timestamp: float):
         """Handle data received from any device"""
         device = self.devices.get(device_name)
         self.update_graph(device, data)
@@ -117,7 +117,7 @@ class Laser_Data(Monitoring_Interface):
 
             elif self.devices[device_name].graph_type == 'density_2d':
                 _data = data['image']
-            self.scheduler.on_data_received(device_name, _data)
+            self.scheduler.on_data_received(device_name, _data, timestamp)
 
 
         elif self.verbose:

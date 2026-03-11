@@ -5,6 +5,7 @@ class DataSaveScheduler:
     def __init__(self, save_handler):
         self.save_handler = save_handler
         self.latest_data = {}  # device_id -> latest data point
+        self.latest_timestamp = {}
         self.timers = {}  # device_id -> QTimer
 
     def register_device(self, device_id: str, saving_period: float):
@@ -15,10 +16,12 @@ class DataSaveScheduler:
         self.timers[device_id] = timer
         self.latest_data[device_id] = None
 
-    def on_data_received(self, device_id, data):
+    def on_data_received(self, device_id, data, timestamp):
         """Called when new data arrives from device"""
         # Always update the latest data
         self.latest_data[device_id] = data
+        self.latest_timestamp[device_id] = timestamp
+
         # Your display handler runs here
         # No save logic needed!
 
