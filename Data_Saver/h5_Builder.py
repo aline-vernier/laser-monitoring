@@ -83,36 +83,12 @@ class H5Builder:
                         f[dataset_name].attrs['graph_type'] = device.graph_type
 
             print(f"Success! Created datasets for {len(devices)} devices")
-    def append_data(self, device_id: str, timestamp: float, value: float):
-        """Append a single (timestamp, value) pair to a device's dataset"""
-
-        with self.lock:  # Thread-safe for async operations
-            with h5py.File(self.file, 'a') as f:
-                dataset_name = f'devices/{device_id}/data'
-
-                if dataset_name not in f:
-                    raise ValueError(f"Dataset {dataset_name} not found")
-
-                dataset = f[dataset_name]
-                graph_type = dataset.attrs.get('graph_type')
-                print(f'Graph type: {graph_type}')
-                if graph_type == 'density_2d':
-                    # Resize dataset and add new image
-                    dataset.resize((dataset.shape[0] + 1, *dataset.shape[1:]))
-                    dataset[-1] = data  # Add image to the last position
-                else :
-                    current_size = dataset.shape[0]
-                
-                # Resize and append
-                    dataset.resize(current_size + 1, axis=0)
-                    dataset[current_size] = [timestamp, value]
 
     def append_batch(self, device_id: str, data: np.ndarray, timestamps: np.ndarray):
         """Append multiple (timestamp, value) pairs at once
 
         """
         t_0 = time.time()
-        print (f'Timestamps from append batch: {timestamps}')
 
         with self.lock:
             with h5py.File(self.file, 'a') as f:

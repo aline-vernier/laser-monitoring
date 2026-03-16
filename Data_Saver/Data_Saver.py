@@ -81,7 +81,6 @@ class DataSaver(QObject):
         else:
             data_point = args
 
-        print(f'Data point = {data_point}')
 
         # Add to buffer (non-blocking)
         try:
@@ -135,7 +134,6 @@ class DataSaver(QObject):
         # Convert batch to numpy structured array for efficient writing
         for device_id, value , timestamp in batch:
             data = np.array(value)
-            print(f'Timestamp batch : {timestamp}')
             self.h5_file.append_batch(device_id, data, timestamp)
 
         self.total_saved += len(batch)
