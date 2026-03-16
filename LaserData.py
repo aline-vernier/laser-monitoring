@@ -117,6 +117,7 @@ class Laser_Data(Monitoring_Interface):
 
             elif self.devices[device_name].graph_type == 'density_2d':
                 _data = data['image']
+
             self.scheduler.on_data_received(device_name, _data, timestamp)
 
 

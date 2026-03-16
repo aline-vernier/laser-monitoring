@@ -22,18 +22,15 @@ class DataSaveScheduler:
         self.latest_data[device_id] = data
         self.latest_timestamp[device_id] = timestamp
 
-        # Your display handler runs here
-        # No save logic needed!
-
     def _save_if_available(self, device_id):
         """Timer callback - saves if data is available"""
         data = self.latest_data.get(device_id)
+        timestamp = self.latest_timestamp.get(device_id)
         if data is not None:
-            self.save_handler(device_id, data)
-            self.latest_data[device_id] = None  # Optional: clear after save
+            self.save_handler(device_id, data, timestamp)
+            self.latest_data[device_id] = None
 
 if __name__ == "__main__":
-
     def handler():
         print(f'Doing stuff with data')
     # Usage
