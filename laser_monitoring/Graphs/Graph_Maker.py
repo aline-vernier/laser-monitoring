@@ -1,6 +1,6 @@
-from Graphs.Graph_StyleSheet import Dark_StyleSheet
-from Device_Classes.Devices import Device
-import Device_Classes.Devices as Devices
+from laser_monitoring.Graphs.Graph_StyleSheet import Dark_StyleSheet
+from laser_monitoring.Device_Classes.Devices import Device
+from laser_monitoring import Device_Classes as Devices
 
 from PyQt6.QtWidgets import QWidget
 import pyqtgraph as pg

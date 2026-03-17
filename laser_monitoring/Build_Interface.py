@@ -6,8 +6,7 @@ Created on 2025/12/16
 Build Spectrometer Interface - GUI only
 """
 from PyQt6.QtWidgets import QApplication, QVBoxLayout, QWidget, QHBoxLayout, QGridLayout
-from PyQt6.QtWidgets import (QLabel, QMainWindow, QStatusBar, QComboBox,
-                             QCheckBox, QDoubleSpinBox,  QPushButton, QLineEdit, QFileDialog)
+from PyQt6.QtWidgets import (QLabel, QMainWindow, QStatusBar, QPushButton, QLineEdit, QFileDialog)
 import PyQt6.QtGui as QtGui
 from PyQt6.QtGui import QIcon, QAction
 from PyQt6.QtCore import pyqtSignal
@@ -15,11 +14,11 @@ import sys
 import qdarkstyle
 import os
 import pathlib
-import Graphs.Graph_Maker
-from Graphs.Graph_Maker import GraphUpdater
-from Device_Classes.Devices import Device 
+from laser_monitoring.Graphs.Graph_Maker import GraphUpdater
+from laser_monitoring.Graphs.Graph_Maker import GraphMaker, RollingGraph, StaticGraph
+from laser_monitoring.Device_Classes.Devices import Device
 
-from SubMenus.WinOption import OPTION
+from laser_monitoring.SubMenus.WinOption import OPTION
 
 sepa = os.sep
 
@@ -174,9 +173,10 @@ class Monitoring_Interface(QMainWindow):
     ############################################
 
     def add_graph(self, device: Device):
-        graph = Graphs.Graph_Maker.GraphMaker.create(device)    
+        #graph = laser_monitoring.Graphs.Graph_Maker.GraphMaker.create(device)
+        graph = GraphMaker.create(device)
         self.graphs[device.name] = graph
-        if type(graph) in (Graphs.Graph_Maker.RollingGraph, Graphs.Graph_Maker.StaticGraph):
+        if type(graph) in (RollingGraph, StaticGraph):
             self.vbox1.addWidget(graph.graph)
             self.vbox1.setSpacing(0)
 

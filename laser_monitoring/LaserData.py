@@ -4,12 +4,12 @@ from PyQt6.QtCore import pyqtSlot
 from PyQt6 import QtCore
 import sys
 import qdarkstyle
-from Device_Classes.Devices import DeviceMaker
+from laser_monitoring.Device_Classes.Devices import DeviceMaker
 from Build_Interface import Monitoring_Interface
-from diagServer.diagServer import diagServer
-from Config.Config_RW import readConfig
-from Data_Saver.Data_Saver import DataSaver
-from Data_Saver.Data_Scheduler import DataSaveScheduler
+from laser_monitoring.diagServer.diagServer import diagServer
+from laser_monitoring.Config.Config_RW import readConfig
+from laser_monitoring.Data_Saver.Data_Saver import DataSaver
+from laser_monitoring.Data_Saver.Data_Scheduler import DataSaveScheduler
 import pathlib
 
 class Laser_Data(Monitoring_Interface):
@@ -56,8 +56,7 @@ class Laser_Data(Monitoring_Interface):
             try:
                 # Dictionary of device objects
                 device_name = dev['name']
-                device = DeviceMaker.create(dev, polling_period=dev['polling period'],
-                                            saving_period=dev['saving period'])
+                device = DeviceMaker.create(dev)
 
                 self.devices[device_name] = device
                 self.connect_device_signals(device)
@@ -170,7 +169,7 @@ if __name__ == "__main__":
     appli.setStyleSheet(qdarkstyle.load_stylesheet(qt_api='pyqt6'))
     laser_data = Laser_Data(polling_period=1, verbose=False, filename='new_laser_data.h5',
                             root_path='C:/Users/APPLI/Python/Older versions/laser-monitoring/Data',
-                            config_file="./Config/dummy_config.json",
+                            config_file="Config/dummy_config.json",
                             data_flush_period=5)
     laser_data.load_config()
     laser_data.create_devices()

@@ -1,8 +1,11 @@
 from PyQt6.QtCore import pyqtSignal, QObject, QTimer
 from datetime import datetime
 import random
-import numpy as np
+from importlib.resources import files
 from PIL import Image
+import numpy as np
+
+image_path = files("laser_monitoring.Device_Classes.SampleImages") / "FOCAL_SPOT.TIFF"
 
 class Data_Acquisition(QObject):
     """Base class that runs in a separate thread"""
@@ -47,7 +50,8 @@ class VirtualDevice(Data_Acquisition):
             'static_1d': (2048,),
             'density_2d': (808, 608)
         }
-        self.im = np.array(Image.open('./Device_Classes/SampleImages/FOCAL_SPOT.TIFF')).T
+        #self.im = np.array(Image.open('./Device_Classes/SampleImages/FOCAL_SPOT.TIFF')).T
+        self.im = np.array(Image.open(image_path)).T
 
     def setup(self):
         pass

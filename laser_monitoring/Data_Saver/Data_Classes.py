@@ -1,7 +1,6 @@
 from dataclasses import dataclass, field
-from typing import Optional, Dict, Tuple, Any
+from typing import Optional, Dict, Tuple
 import h5py
-from Device_Classes.Devices import DeviceMaker
 
 
 @dataclass

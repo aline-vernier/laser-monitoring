@@ -1,8 +1,7 @@
-from matplotlib.pyplot import plot
-from Graphs.Colours import *
 import random
 import pyqtgraph as pg
 import numpy as np
+from laser_monitoring.Graphs.Colours import *
 
 class CustomAxisItem(pg.AxisItem):
     """ Class that overrides the AxisItem tickStrings and labelString methods which give '1 knm'
@@ -44,7 +43,7 @@ class Dark_StyleSheet():
         self.graph.setFixedWidth(500)
         self.graph.setFixedHeight(200)
         self.plot.showGrid(x=True, y=True, alpha=0.2)
-        self.graph.setBackground(anthracite) 
+        self.graph.setBackground(anthracite)
         self.plot.setContentsMargins(10, 10, 20, 10)
         random.seed(random.uniform(1, 3000))
         pen_colour = random.choice(curve_colours)
