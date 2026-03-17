@@ -199,16 +199,19 @@ if __name__ == "__main__":
 
     # Example usage
     device_def = {
-        "name": "Spectrometer",
-        "address": "SY-SPECTRO_1/Spectrometer/FE1",
-        "type": "spectrometer",
-        "is virtual": False
+        "name": "FE Amp Energy",
+        "address": "FE_EM_2/energymeter/1",
+        "type": "energy meter",
+        "is virtual" : False,
+        "saving period": 1, 
+        "polling period": 1
         }
 
     device = DeviceMaker.create(device_def)
-    print(f"Created device: {device.name} of type {device.type}")
 
-    device.start_device()
-    device.worker.data_received.connect(on_device_data)
+    print(f"Created device: {device.name} of type {device.type}")
+    print(f'{device.shape}')
+
+
 
 

@@ -18,7 +18,7 @@ from laser_monitoring.Graphs.Graph_Maker import GraphUpdater
 from laser_monitoring.Graphs.Graph_Maker import GraphMaker, RollingGraph, StaticGraph
 from laser_monitoring.Device_Classes.Devices import Device
 
-from laser_monitoring.SubMenus.WinOption import OPTION
+
 
 sepa = os.sep
 
@@ -52,7 +52,6 @@ class Monitoring_Interface(QMainWindow):
         self.setStatusBar(self.statusBar)
 
         self.fileMenu = self.menuBar().addMenu('&File')
-        self.winOpt = OPTION(conf=None, name=self.name, parent=self)
         self.optionAutoSaveAct = QAction(QtGui.QIcon(self.icon+"Settings.png"),
                                          'Options', self)
 

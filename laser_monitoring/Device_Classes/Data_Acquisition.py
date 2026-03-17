@@ -107,16 +107,23 @@ class TangoDevice(Data_Acquisition):
     @property
     def data_shapes(self):
         _data_shape = dict({})
+    
         for key, attribute in self.parent.attrs.items():
-            _data_shape[key]=np.shape(self.parent.device_proxy.read_attribute(attribute).value)
-            print (f'key : {key}, attribute: {attribute}, attribute: {self.parent.device_proxy.read_attribute(attribute)}')
+            if attribute is not None: 
+                print (f'Getting value from key : {key}, attribute: {attribute}')
+                _data_shape[key]=np.shape(self.parent.device_proxy.read_attribute(attribute).value)
+                print (f'Attribute value: {_data_shape[key]}')
         return _data_shape
 
     def _generate_data(self):
         data = {}
         timestamp = (datetime.now()).timestamp()
+
         for key, attribute in self.parent.attrs.items():
-            data[key] = self.parent.device_proxy.read_attribute(attribute).value
+            if attribute is not None :
+                data[key] = self.parent.device_proxy.read_attribute(attribute).value
+            else : 
+                data[key] = datetime.now().timestamp() - self._t0
         self.data_received.emit(self.device_id, data, timestamp)
 
         # Schedule next call

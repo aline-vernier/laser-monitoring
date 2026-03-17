@@ -168,8 +168,8 @@ if __name__ == "__main__":
     appli = QApplication(sys.argv)
     appli.setStyleSheet(qdarkstyle.load_stylesheet(qt_api='pyqt6'))
     laser_data = Laser_Data(polling_period=1, verbose=False, filename='new_laser_data.h5',
-                            root_path='C:/Users/APPLI/Python/Older versions/laser-monitoring/Data',
-                            config_file="Config/dummy_config.json",
+                            root_path='C:/Users/APPLI/Documents/Python/laser-monitoring/Data',
+                            config_file="C:/Users/APPLI/Documents/Python/laser-monitoring/laser_monitoring/Config/tango_config.json",
                             data_flush_period=5)
     laser_data.load_config()
     laser_data.create_devices()
