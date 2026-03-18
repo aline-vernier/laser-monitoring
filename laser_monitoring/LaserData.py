@@ -70,9 +70,8 @@ class Laser_Data(Monitoring_Interface):
   
             except Exception as e:
                 print(e)
-                device = None
-            
-            if device is not None : 
+
+            else:
                 self.devices[device_name] = device
                 self.connect_device_signals(device)
                 self.add_graph(device)
@@ -99,10 +98,10 @@ class Laser_Data(Monitoring_Interface):
         """Start monitoring all devices"""
 
         for device_name, device in self.devices.items():
-            try : 
+            try:
                 device.start_device()
                 print(f'Starting {device_name}')
-            except Exception as e  : 
+            except Exception as e:
                 raise Exception(f'Failed to start {device_name}, {e}') 
 
             self.scheduler.register_device(device_name, saving_period=device.saving_period)
@@ -135,7 +134,6 @@ class Laser_Data(Monitoring_Interface):
                 raise Exception('Graph type not handled')
 
             self.scheduler.on_data_received(device_name, _data, timestamp)
-
 
         elif self.verbose:
             print(f'Method not implemented for device type: {self.devices[device_name].type}')
@@ -176,7 +174,7 @@ class Laser_Data(Monitoring_Interface):
 
     @pyqtSlot(str, str)
     def _on_device_error(self, device_id: str, error: str):
-        """Handle errors from any device"""
+        """Handles errors from any device"""
         print('error')
 
     @pyqtSlot()
@@ -193,7 +191,7 @@ if __name__ == "__main__":
     appli = QApplication(sys.argv)
     appli.setStyleSheet(qdarkstyle.load_stylesheet(qt_api='pyqt6'))
     laser_data = Laser_Data(polling_period=1, verbose=False, filename='new_laser_data.h5',
-                            root_path='C:/Users/APPLI/Documents/Python/laser-monitoring/Data',
+                            root_path='./Data',
                             config_file="C:/Users/APPLI/Python/Laser Monitoring/laser-monitoring/"
                                         "laser_monitoring/Config/dummy_config.json",
                             data_flush_period=5)

@@ -1,9 +1,8 @@
 from tango import DeviceProxy
 from laser_monitoring.Device_Classes import Data_Acquisition
 from PyQt6.QtCore import QObject, QThread
+from laser_monitoring.Exceptions.Device_Exceptions import DeviceConnectException
 
-from dataclasses import dataclass, field
-from typing import Optional, Dict, Tuple
 
 """
 To create new device, just specify it in device list, as Virtual Device 
@@ -22,7 +21,6 @@ class Device(QObject):
         self.address = definition['address']
         self.type = definition['type']
         self.isVirtual = definition['is virtual']
-        print(f'Device is virtual: {self.isVirtual is True}')
         self.thread = QThread()
         self.polling_period = definition['polling period']
         self.saving_period = definition['saving period']
@@ -41,9 +39,9 @@ class Device(QObject):
     def setup(self):
         try:
             self.device_proxy = DeviceProxy(self.address)
-        except Exception:
+        except Exception as e:
             self.device_proxy = None
-            raise Exception(f"Could not connect to device: {self.name}")
+            raise DeviceConnectException(self.name, e)
 
     def start_device(self):
         """Start the device thread"""

@@ -4,6 +4,7 @@ import random
 from importlib.resources import files
 from PIL import Image
 import numpy as np
+from laser_monitoring.Exceptions.Device_Exceptions import DeviceReadException
 
 image_path = files("laser_monitoring.Device_Classes.SampleImages") / "FOCAL_SPOT.TIFF"
 
@@ -11,18 +12,18 @@ class Data_Acquisition(QObject):
     """Base class that runs in a separate thread"""
     # Signal must be a class attribute
     data_received = pyqtSignal(str, dict, float)  # (device_id, data, timestamp)
-    error_occurred = pyqtSignal(str, str)  # (device_id, error_message)
+    data_acquisition_err_sig = pyqtSignal(str, str)  # (device_id, error_message)
 
     def __init__(self, parent=None):
         super().__init__()
         if parent:
-            self.device_id = parent.name
+            self.name = parent.name
             self.data_type = parent.graph_type
             self.polling_period = parent.polling_period
             self.running = False
             self.parent = parent
         else:
-            self.device_id = "Virtual Device"
+            self.name = "Virtual Device"
             self.data_type = "rolling_1d"
             self.running = False
             self.polling_period = 2
@@ -37,7 +38,7 @@ class Data_Acquisition(QObject):
         try :
             self._generate_data()  # Start the cycle
         except Exception as e :
-            print(f'Could not start device {self.device_id}, {e}')
+            print(f'Could not start device {self.name}, {e}')
     
     def stop(self):
         self.running = False
@@ -60,7 +61,7 @@ class VirtualDevice(Data_Acquisition):
     def _generate_data(self):
         data = self.data_generator()
         timestamp = (datetime.now()).timestamp()
-        self.data_received.emit(self.device_id, data, timestamp)
+        self.data_received.emit(self.name, data, timestamp)
         
         # Schedule next call
         QTimer.singleShot(self.period_ms, self._generate_data)
@@ -112,11 +113,16 @@ class TangoDevice(Data_Acquisition):
         for key, attribute in self.parent.attrs.items():
             if attribute is not None: 
                 print (f'Getting value from key : {key}, attribute: {attribute}')
-                _data_shape[key]=np.shape(self.parent.device_proxy.read_attribute(attribute).value)
-                if _data_shape[key] == ():
-                    _data_shape[key] = (1,)
-                print (f'Attribute value: {_data_shape[key]}')
-        return _data_shape
+                try:
+                    _data_shape[key]=np.shape(self.parent.device_proxy.read_attribute(attribute).value)
+                    if _data_shape[key] == ():
+                        _data_shape[key] = (1,)
+                    print (f'Attribute value: {_data_shape[key]}')
+                except Exception as e:
+                    self.data_acquisition_err_sig.emit(self.name, e)
+                    raise DeviceReadException(self.name, e)
+                else:
+                    return _data_shape
 
     def _generate_data(self):
         data = {}
@@ -129,12 +135,11 @@ class TangoDevice(Data_Acquisition):
                 else:
                     data[key] = datetime.now().timestamp() - self._t0
             except Exception as e:
-                data[key] = None
-                raise Exception(f'Device proxy read attribute failed:\n '
-                                f'Exception {e} from device_proxy.read_attribute(attribute).value')
+                self.data_acquisition_err_sig.emit(self.name, e)
+                raise DeviceReadException(self.name, e)
 
             else: # Signal is only emitted if no exception was raised
-                self.data_received.emit(self.device_id, data, timestamp)
+                self.data_received.emit(self.name, data, timestamp)
 
         # Schedule next call
         QTimer.singleShot(self.period_ms, self._generate_data)
@@ -145,12 +150,10 @@ if __name__ == "__main__":
     import sys
 
     app = QApplication(sys.argv)
-
     virtual_device = VirtualDevice()
     virtual_device.data_received.connect(lambda device_id, data, timestamp:
                                          print(f"Data from {device_id}: {data}, timestamp: {timestamp}"))
     virtual_device.start()
     print(f"From Data Acquisition ; Data shape: {virtual_device.shape()}")
     virtual_device.stop()
-
     sys.exit(app.exec())
