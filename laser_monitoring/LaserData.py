@@ -56,15 +56,18 @@ class Laser_Data(Monitoring_Interface):
             try:
                 # Dictionary of device objects
                 device_name = dev['name']
-                device = DeviceMaker.create(dev)
-
+                device = DeviceMaker.create(dev)               
+  
+            except Exception as e:
+                print(e)
+                device = None
+            
+            if device is not None : 
                 self.devices[device_name] = device
                 self.connect_device_signals(device)
                 self.add_graph(device)
                 self.add_stretch()
-  
-            except Exception as e:
-                print(e)
+
 
     def configure_h5File(self):
         self.data_saver.start(self.devices, filename=self.filename, root_path=self.root_path)
