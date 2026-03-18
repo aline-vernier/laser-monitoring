@@ -9,7 +9,7 @@
     },
     "device_2": {
         "name": "FE Amp spectrum",
-        "address": "\"SY-SPECTRO_1/Spectrometer/FE3",
+        "address": "SY-SPECTRO_1/Spectrometer/FE3",
         "type": "spectrometer",
         "is virtual" : false,
         "saving period": 10, 
