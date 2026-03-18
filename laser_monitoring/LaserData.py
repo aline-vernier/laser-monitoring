@@ -89,9 +89,14 @@ class Laser_Data(Monitoring_Interface):
         """Start monitoring all devices"""
 
         for device_name, device in self.devices.items():
+            try : 
+                device.start_device()
+                print(f'Starting {device_name}')
+            except Exception as e  : 
+                raise Exception(f'Failed to start {device_name}, {e}') 
+
             self.scheduler.register_device(device_name, saving_period=device.saving_period)
-            device.start_device()
-            print(f'Starting devices')
+ 
 
     def stop_all_devices(self):
         """Stop monitoring all devices"""
@@ -129,14 +134,21 @@ class Laser_Data(Monitoring_Interface):
 
     @pyqtSlot()
     def _on_start_request(self):
-        try:
-
-            self.scheduler = DataSaveScheduler(self.data_saver.on_data_event)
+        self.scheduler = DataSaveScheduler(self.data_saver.on_data_event)
+        try:          
             self.start_all_devices()
-            self.configure_h5File()
-            self.update_to_running()
         except Exception as e:
             print(f'Exception {e} starting devices')
+        try:             
+            self.configure_h5File()
+
+        except Exception as e: 
+            print(f'Exception {e} configuring h5 file')
+
+        try: 
+            self.update_to_running()
+        except Exception as e: 
+            print(f'Exception {e} updating to running')
 
     def _on_stop_request(self):
         try:

@@ -157,10 +157,11 @@ class EnergyMeter(Device):
         self.graph_type = 'rolling_1d'
         self.setup()
         self._start_thread()
+        print(f'Energymeter shape : {self.shape}')
 
     @property
     def shape(self):
-        return self.worker.data_shapes['energy_1']
+        return self.worker.data_shapes['y']
 
 
 class DeviceMaker:

@@ -113,7 +113,7 @@ class TangoDevice(Data_Acquisition):
                 print (f'Getting value from key : {key}, attribute: {attribute}')
                 _data_shape[key]=np.shape(self.parent.device_proxy.read_attribute(attribute).value)
                 if _data_shape[key] == ():
-                    _data_shape[key] = -1
+                    _data_shape[key] = (1,)
                 print (f'Attribute value: {_data_shape[key]}')
         return _data_shape
 
