@@ -4,12 +4,12 @@ from PyQt6.QtCore import pyqtSlot
 from PyQt6 import QtCore
 import sys
 import qdarkstyle
-from Device_Classes.Devices import DeviceMaker
+from laser_monitoring.Device_Classes.Devices import DeviceMaker
 from Build_Interface import Monitoring_Interface
-from diagServer.diagServer import diagServer
-from Config.Config_RW import readConfig
-from Data_Saver.Data_Saver import DataSaver
-from Data_Saver.Data_Scheduler import DataSaveScheduler
+from laser_monitoring.diagServer.diagServer import diagServer
+from laser_monitoring.Config.Config_RW import readConfig
+from laser_monitoring.Data_Saver.Data_Saver import DataSaver
+from laser_monitoring.Data_Saver.Data_Scheduler import DataSaveScheduler
 import pathlib
 
 class Laser_Data(Monitoring_Interface):
@@ -56,16 +56,18 @@ class Laser_Data(Monitoring_Interface):
             try:
                 # Dictionary of device objects
                 device_name = dev['name']
-                device = DeviceMaker.create(dev, polling_period=dev['polling period'],
-                                            saving_period=dev['saving period'])
-
+                device = DeviceMaker.create(dev)               
+  
+            except Exception as e:
+                print(e)
+                device = None
+            
+            if device is not None : 
                 self.devices[device_name] = device
                 self.connect_device_signals(device)
                 self.add_graph(device)
                 self.add_stretch()
-  
-            except Exception as e:
-                print(e)
+
 
     def configure_h5File(self):
         self.data_saver.start(self.devices, filename=self.filename, root_path=self.root_path)
@@ -87,9 +89,14 @@ class Laser_Data(Monitoring_Interface):
         """Start monitoring all devices"""
 
         for device_name, device in self.devices.items():
+            try : 
+                device.start_device()
+                print(f'Starting {device_name}')
+            except Exception as e  : 
+                raise Exception(f'Failed to start {device_name}, {e}') 
+
             self.scheduler.register_device(device_name, saving_period=device.saving_period)
-            device.start_device()
-            print(f'Starting devices')
+ 
 
     def stop_all_devices(self):
         """Stop monitoring all devices"""
@@ -127,14 +134,21 @@ class Laser_Data(Monitoring_Interface):
 
     @pyqtSlot()
     def _on_start_request(self):
-        try:
-
-            self.scheduler = DataSaveScheduler(self.data_saver.on_data_event)
+        self.scheduler = DataSaveScheduler(self.data_saver.on_data_event)
+        try:          
             self.start_all_devices()
-            self.configure_h5File()
-            self.update_to_running()
         except Exception as e:
             print(f'Exception {e} starting devices')
+        try:             
+            self.configure_h5File()
+
+        except Exception as e: 
+            print(f'Exception {e} configuring h5 file')
+
+        try: 
+            self.update_to_running()
+        except Exception as e: 
+            print(f'Exception {e} updating to running')
 
     def _on_stop_request(self):
         try:
@@ -169,8 +183,8 @@ if __name__ == "__main__":
     appli = QApplication(sys.argv)
     appli.setStyleSheet(qdarkstyle.load_stylesheet(qt_api='pyqt6'))
     laser_data = Laser_Data(polling_period=1, verbose=False, filename='new_laser_data.h5',
-                            root_path='C:/Users/APPLI/Python/Older versions/laser-monitoring/Data',
-                            config_file="./Config/dummy_config.json",
+                            root_path='C:/Users/APPLI/Documents/Python/laser-monitoring/Data',
+                            config_file="C:/Users/APPLI/Documents/Python/laser-monitoring/laser_monitoring/Config/tango_config.json",
                             data_flush_period=5)
     laser_data.load_config()
     laser_data.create_devices()
