@@ -11,6 +11,16 @@ from laser_monitoring.Config.Config_RW import readConfig
 from laser_monitoring.Data_Saver.Data_Saver import DataSaver
 from laser_monitoring.Data_Saver.Data_Scheduler import DataSaveScheduler
 import pathlib
+from laplace_log.log_lhc import LoggerLHC, log
+
+LoggerLHC(
+    app_name="Laser Monitoring",
+    file_level="debug",
+    console_level="info",
+)
+
+log.info("Starting OptWindow...")
+
 
 class Laser_Data(Monitoring_Interface):
     signalLaserDataDict = QtCore.pyqtSignal(object)
@@ -184,7 +194,8 @@ if __name__ == "__main__":
     appli.setStyleSheet(qdarkstyle.load_stylesheet(qt_api='pyqt6'))
     laser_data = Laser_Data(polling_period=1, verbose=False, filename='new_laser_data.h5',
                             root_path='C:/Users/APPLI/Documents/Python/laser-monitoring/Data',
-                            config_file="C:/Users/APPLI/Documents/Python/laser-monitoring/laser_monitoring/Config/tango_config.json",
+                            config_file="C:/Users/APPLI/Python/Laser Monitoring/laser-monitoring/"
+                                        "laser_monitoring/Config/dummy_config.json",
                             data_flush_period=5)
     laser_data.load_config()
     laser_data.create_devices()

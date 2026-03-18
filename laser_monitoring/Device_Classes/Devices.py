@@ -10,17 +10,6 @@ To create new device, just specify it in device list, as Virtual Device
 or Tango Device and add it to the DeviceMaker class
 """
 
-@dataclass
-class DeviceConfig:
-    name: str
-    type: str
-    dataset_number: int
-
-    metadata: Optional[Dict] = field(default_factory=dict)
-    shape: Optional[Tuple] = None
-    input_dim: Optional[int] = None
-    output_dim: Optional[int] = None
-
 
 class Device(QObject):
     """
@@ -55,8 +44,6 @@ class Device(QObject):
         except Exception:
             self.device_proxy = None
             raise Exception(f"Could not connect to device: {self.name}")
-
-
 
     def start_device(self):
         """Start the device thread"""

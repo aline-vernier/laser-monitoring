@@ -29,14 +29,15 @@ class Data_Acquisition(QObject):
         self._t0 = None
 
 
-          
-
     def start(self):
         """Called when moved to thread"""
         self.running = True
         self.period_ms = int(self.polling_period*1000)  # Set default period if not set
         self._t0 = datetime.now().timestamp()
-        self._generate_data()  # Start the cycle 
+        try :
+            self._generate_data()  # Start the cycle
+        except Exception as e :
+            print(f'Could not start device {self.device_id}, {e}')
     
     def stop(self):
         self.running = False
@@ -50,7 +51,7 @@ class VirtualDevice(Data_Acquisition):
             'static_1d': (2048,),
             'density_2d': (808, 608)
         }
-        #self.im = np.array(Image.open('./Device_Classes/SampleImages/FOCAL_SPOT.TIFF')).T
+
         self.im = np.array(Image.open(image_path)).T
 
     def setup(self):
@@ -122,11 +123,18 @@ class TangoDevice(Data_Acquisition):
         timestamp = (datetime.now()).timestamp()
 
         for key, attribute in self.parent.attrs.items():
-            if attribute is not None :
-                data[key] = self.parent.device_proxy.read_attribute(attribute).value
-            else : 
-                data[key] = datetime.now().timestamp() - self._t0
-        self.data_received.emit(self.device_id, data, timestamp)
+            try:
+                if attribute is not None:
+                    data[key] = self.parent.device_proxy.read_attribute(attribute).value
+                else:
+                    data[key] = datetime.now().timestamp() - self._t0
+            except Exception as e:
+                data[key] = None
+                raise Exception(f'Device proxy read attribute failed:\n '
+                                f'Exception {e} from device_proxy.read_attribute(attribute).value')
+
+            else: # Signal is only emitted if no exception was raised
+                self.data_received.emit(self.device_id, data, timestamp)
 
         # Schedule next call
         QTimer.singleShot(self.period_ms, self._generate_data)
